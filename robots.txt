@@ -1,0 +1,57 @@
+# Robots.txt for IECA - Indian Error Cyber Army
+# https://ieca.zehrasec.com/robots.txt
+
+User-agent: *
+Allow: /
+
+# Important pages
+Allow: /index.html
+Allow: /styles/
+Allow: /scripts/
+Allow: /assets/
+
+# PWA files
+Allow: /manifest.json
+Allow: /sw.js
+
+# SEO files
+Allow: /sitemap.xml
+Allow: /robots.txt
+
+# Disallow sensitive areas (for production)
+Disallow: /admin/
+Disallow: /api/
+Disallow: /backend-simulation.js
+Disallow: *.log
+Disallow: /private/
+Disallow: /temp/
+Disallow: /cache/
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://ieca.zehrasec.com/sitemap.xml
+
+# Special instructions for security crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Block malicious bots
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
