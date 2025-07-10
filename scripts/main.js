@@ -882,6 +882,14 @@ class AdminSystem {
     }
     
     showAdminPanel() {
+        // Show analytics dashboard in main window
+        const analyticsSection = document.getElementById('analytics');
+        if (analyticsSection) {
+            analyticsSection.style.display = 'block';
+            analyticsSection.scrollIntoView({ behavior: 'smooth' });
+            utils.showNotification('Analytics Dashboard opened!', 'success');
+        }
+        
         // Create admin panel window
         const adminWindow = window.open('', 'IECA_Admin', 'width=1200,height=800,scrollbars=yes,resizable=yes');
         
@@ -1493,104 +1501,709 @@ class LoadingScreen {
     }
 }
 
-// Initialize all systems when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize loading screen
-    new LoadingScreen();
+// Blog functionality
+class BlogManager {
+    constructor() {
+        this.initializeBlog();
+    }
     
-    // Initialize matrix rain effect
-    new MatrixRain();
-    
-    // Initialize navigation
-    new Navigation();
-    
-    // Initialize chat system
-    new ChatSystem();
-    
-    // Initialize form handler
-    new FormHandler();
-    
-    // Initialize admin system
-    new AdminSystem();
-    
-    // Initialize notification close handlers
-    document.querySelectorAll('.notification-close').forEach(btn => {
-        btn.addEventListener('click', () => {
-            btn.closest('.notification').classList.remove('show');
+    initializeBlog() {
+        // Category filtering
+        const categoryButtons = document.querySelectorAll('.category-btn');
+        const blogCards = document.querySelectorAll('.blog-card');
+        
+        categoryButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Update active button
+                categoryButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Filter posts
+                const category = btn.dataset.category;
+                this.filterPosts(category, blogCards);
+            });
         });
-    });
+        
+        // Pagination
+        this.initializePagination();
+    }
     
-    // Initialize smooth scrolling for all internal links
-    document.querySelectorAll('a[href^="#"]').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const target = document.querySelector(link.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
+    filterPosts(category, blogCards) {
+        blogCards.forEach(card => {
+            if (category === 'all' || card.dataset.category === category) {
+                card.style.display = 'block';
+                card.style.animation = 'fadeIn 0.5s ease';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    initializePagination() {
+        const prevBtn = document.getElementById('prevPage');
+        const nextBtn = document.getElementById('nextPage');
+        
+        if (prevBtn && nextBtn) {
+            prevBtn.addEventListener('click', () => this.changePage(-1));
+            nextBtn.addEventListener('click', () => this.changePage(1));
+        }
+    }
+    
+    changePage(direction) {
+        // Pagination logic (simulated)
+        console.log('Page changed:', direction);
+        utils.showNotification(
+            direction > 0 ? 'Loading next page...' : 'Loading previous page...',
+            'info',
+            2000
+        );
+    }
+}
+
+// Member Portal functionality
+class MemberPortal {
+    constructor() {
+        this.currentUser = null;
+        this.activeTab = 'overview';
+        this.initializePortal();
+    }
+    
+    initializePortal() {
+        this.setupLoginForm();
+        this.setupDashboardTabs();
+        this.setupLogout();
+    }
+    
+    setupLoginForm() {
+        const loginForm = document.getElementById('memberLoginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleLogin(e.target);
+            });
+        }
+    }
+    
+    handleLogin(form) {
+        const email = form.memberEmail.value;
+        const password = form.memberPassword.value;
+        
+        // Simulate authentication (in real app, this would be a secure API call)
+        if (email && password) {
+            this.currentUser = {
+                email,
+                name: 'John Doe',
+                role: 'Senior Security Analyst',
+                level: 5,
+                points: 950,
+                certifications: 12,
+                contributions: 45,
+                rank: 8
+            };
+            
+            this.showDashboard();
+            utils.showNotification('Welcome back! Successfully logged in.', 'success');
+        } else {
+            utils.showNotification('Please enter valid credentials.', 'error');
+        }
+    }
+    
+    showDashboard() {
+        const loginSection = document.getElementById('memberLogin');
+        const dashboardSection = document.getElementById('memberDashboard');
+        
+        if (loginSection && dashboardSection) {
+            loginSection.style.display = 'none';
+            dashboardSection.style.display = 'block';
+            
+            // Update dashboard with user data
+            this.updateDashboardData();
+        }
+    }
+    
+    updateDashboardData() {
+        if (!this.currentUser) return;
+        
+        // Update user info
+        const nameEl = document.querySelector('.member-info .info h3');
+        const roleEl = document.querySelector('.member-info .info p');
+        const levelEl = document.querySelector('.member-level');
+        
+        if (nameEl) nameEl.textContent = this.currentUser.name;
+        if (roleEl) roleEl.textContent = this.currentUser.role;
+        if (levelEl) levelEl.textContent = `Level ${this.currentUser.level} - Expert`;
+        
+        // Update stats
+        const statCards = document.querySelectorAll('.stat-card h4');
+        if (statCards.length >= 4) {
+            statCards[0].textContent = this.currentUser.points;
+            statCards[1].textContent = this.currentUser.certifications;
+            statCards[2].textContent = this.currentUser.contributions;
+            statCards[3].textContent = `#${this.currentUser.rank}`;
+        }
+    }
+    
+    setupDashboardTabs() {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                this.switchTab(tabId, tabButtons, tabContents);
+            });
+        });
+    }
+    
+    switchTab(tabId, tabButtons, tabContents) {
+        // Update active tab button
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+        
+        // Update active tab content
+        tabContents.forEach(content => content.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        
+        this.activeTab = tabId;
+        
+        // Load tab-specific data
+        this.loadTabData(tabId);
+    }
+    
+    loadTabData(tabId) {
+        switch (tabId) {
+            case 'training':
+                this.loadTrainingData();
+                break;
+            case 'projects':
+                this.loadProjectsData();
+                break;
+            case 'messages':
+                this.loadMessagesData();
+                break;
+            case 'achievements':
+                this.loadAchievementsData();
+                break;
+        }
+    }
+    
+    loadTrainingData() {
+        // Simulate loading training progress
+        const progressBars = document.querySelectorAll('.progress');
+        progressBars.forEach((bar, index) => {
+            const progress = [75, 40][index] || 0;
+            setTimeout(() => {
+                bar.style.width = `${progress}%`;
+            }, 300);
+        });
+    }
+    
+    loadProjectsData() {
+        console.log('Loading projects data...');
+    }
+    
+    loadMessagesData() {
+        console.log('Loading messages data...');
+    }
+    
+    loadAchievementsData() {
+        // Animate achievement badges
+        const achievements = document.querySelectorAll('.achievement-item.earned');
+        achievements.forEach((item, index) => {
+            setTimeout(() => {
+                item.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    item.style.transform = 'scale(1)';
+                }, 200);
+            }, index * 100);
+        });
+    }
+    
+    setupLogout() {
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                this.handleLogout();
+            });
+        }
+    }
+    
+    handleLogout() {
+        this.currentUser = null;
+        
+        const loginSection = document.getElementById('memberLogin');
+        const dashboardSection = document.getElementById('memberDashboard');
+        
+        if (loginSection && dashboardSection) {
+            dashboardSection.style.display = 'none';
+            loginSection.style.display = 'block';
+        }
+        
+        // Clear form
+        const loginForm = document.getElementById('memberLoginForm');
+        if (loginForm) {
+            loginForm.reset();
+        }
+        
+        utils.showNotification('Successfully logged out.', 'info');
+    }
+}
+
+// Analytics functionality
+class AnalyticsManager {
+    constructor() {
+        this.pageViews = 0;
+        this.sessionStart = Date.now();
+        this.userActions = [];
+        this.initializeAnalytics();
+    }
+    
+    initializeAnalytics() {
+        this.trackPageView();
+        this.setupEventTracking();
+        this.startSessionTracking();
+    }
+    
+    trackPageView() {
+        this.pageViews++;
+        console.log('📊 Page view tracked:', this.pageViews);
+        
+        // Store analytics data
+        const analytics = storage.load('analytics') || {
+            totalPageViews: 0,
+            sessions: [],
+            userActions: []
+        };
+        
+        analytics.totalPageViews++;
+        storage.save('analytics', analytics);
+    }
+    
+    setupEventTracking() {
+        // Track button clicks
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('button, .btn, .nav-link')) {
+                this.trackUserAction('click', {
+                    element: e.target.tagName,
+                    text: e.target.textContent?.trim().substring(0, 50),
+                    timestamp: Date.now()
                 });
             }
         });
-    });
-    
-    // Initialize intersection observer for animations
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, observerOptions);
-    
-    // Observe elements for animation
-    document.querySelectorAll('.service-card, .value-item, .benefit-item, .contact-card').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-    });
-    
-    // Console message for developers
-    console.log(`
-    🛡️ IECA - Indian Error Cyber Army
-    
-    Welcome to IECA's official website!
-    
-    Built with ❤️ for India's Digital Security
-    
-    Developers:
-    - Yashab Alam (Founder & CEO)
-    - ZehraSec (Development Partner)
-    
-    Type "IECA" to access admin panel
-    
-    🔒 Protected by advanced security measures
-    `);
-});
-
-// Service Worker registration helper
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
-                console.log('✅ Service Worker registered successfully');
-            })
-            .catch(error => {
-                console.log('❌ Service Worker registration failed');
+        
+        // Track form submissions
+        document.addEventListener('submit', (e) => {
+            this.trackUserAction('form_submit', {
+                formId: e.target.id,
+                timestamp: Date.now()
             });
-    });
+        });
+    }
+    
+    trackUserAction(action, data) {
+        this.userActions.push({
+            action,
+            data,
+            timestamp: Date.now()
+        });
+        
+        console.log('📊 User action tracked:', action, data);
+    }
+    
+    startSessionTracking() {
+        // Track session duration on page unload
+        window.addEventListener('beforeunload', () => {
+            const sessionDuration = Date.now() - this.sessionStart;
+            console.log('📊 Session duration:', sessionDuration / 1000, 'seconds');
+            
+            const analytics = storage.load('analytics') || { sessions: [] };
+            analytics.sessions.push({
+                duration: sessionDuration,
+                pageViews: this.pageViews,
+                actions: this.userActions.length,
+                timestamp: this.sessionStart
+            });
+            storage.save('analytics', analytics);
+        });
+    }
+    
+    getAnalyticsReport() {
+        const analytics = storage.load('analytics') || {};
+        return {
+            totalPageViews: analytics.totalPageViews || 0,
+            totalSessions: analytics.sessions?.length || 0,
+            avgSessionDuration: this.calculateAverageSessionDuration(analytics.sessions || []),
+            topActions: this.getTopUserActions(analytics.userActions || [])
+        };
+    }
+    
+    calculateAverageSessionDuration(sessions) {
+        if (sessions.length === 0) return 0;
+        const totalDuration = sessions.reduce((sum, session) => sum + session.duration, 0);
+        return Math.round((totalDuration / sessions.length) / 1000); // in seconds
+    }
+    
+    getTopUserActions(actions) {
+        const actionCounts = {};
+        actions.forEach(action => {
+            actionCounts[action.action] = (actionCounts[action.action] || 0) + 1;
+        });
+        
+        return Object.entries(actionCounts)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 5);
+    }
 }
 
-// Export for testing (if needed)
-window.IECA = {
-    utils,
-    storage,
-    CONFIG
-};
+// Enhanced UX Features
+class UXEnhancements {
+    constructor() {
+        this.initializeEnhancements();
+    }
+    
+    initializeEnhancements() {
+        this.setupKeyboardNavigation();
+        this.setupSearchFunctionality();
+        this.setupThemeToggle();
+        this.setupVoiceCommands();
+    }
+    
+    setupKeyboardNavigation() {
+        document.addEventListener('keydown', (e) => {
+            // Keyboard shortcuts
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                this.focusSearch();
+            }
+            
+            if (e.key === 'Escape') {
+                this.closeModals();
+            }
+            
+            // Admin panel trigger
+            if (e.key === 'F12' && e.shiftKey) {
+                e.preventDefault();
+                this.triggerAdminPanel();
+            }
+        });
+    }
+    
+    focusSearch() {
+        const searchInput = document.querySelector('.search-input');
+        if (searchInput) {
+            searchInput.focus();
+        } else {
+            utils.showNotification('Search functionality coming soon! Press Ctrl+K', 'info');
+        }
+    }
+    
+    closeModals() {
+        const activeModal = document.querySelector('.modal.active');
+        if (activeModal) {
+            activeModal.classList.remove('active');
+        }
+        
+        const chatWindow = document.querySelector('.chat-window.active');
+        if (chatWindow) {
+            chatWindow.classList.remove('active');
+        }
+    }
+    
+    triggerAdminPanel() {
+        // Trigger admin panel (alternative to typing "IECA")
+        if (window.adminPanel) {
+            window.adminPanel.show();
+        }
+    }
+    
+    setupSearchFunctionality() {
+        // Advanced search will be implemented here
+        console.log('🔍 Advanced search functionality initialized');
+    }
+    
+    setupThemeToggle() {
+        // Light/Dark mode toggle
+        const themeToggle = document.createElement('button');
+        themeToggle.className = 'theme-toggle';
+        themeToggle.innerHTML = '🌙';
+        themeToggle.title = 'Toggle theme';
+        themeToggle.style.cssText = `
+            position: fixed;
+            top: 100px;
+            left: 2rem;
+            z-index: 1000;
+            background: var(--card-bg);
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+        `;
+        
+        themeToggle.addEventListener('click', () => {
+            this.toggleTheme();
+        });
+        
+        document.body.appendChild(themeToggle);
+    }
+    
+    toggleTheme() {
+        const isDark = document.body.classList.contains('light-theme');
+        
+        if (isDark) {
+            document.body.classList.remove('light-theme');
+            utils.showNotification('Switched to dark theme', 'info');
+        } else {
+            document.body.classList.add('light-theme');
+            utils.showNotification('Switched to light theme', 'info');
+        }
+        
+        // Update theme toggle icon
+        const themeToggle = document.querySelector('.theme-toggle');
+        if (themeToggle) {
+            themeToggle.innerHTML = isDark ? '🌙' : '☀️';
+        }
+    }
+    
+    setupVoiceCommands() {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            console.log('🎤 Voice commands initialized');
+            // Voice recognition setup will be implemented here
+        }
+    }
+}
+
+// Analytics Dashboard Functions (Global scope for HTML onclick)
+function exportAnalytics() {
+    if (window.analyticsManager) {
+        const report = window.analyticsManager.getAnalyticsReport();
+        const dataStr = JSON.stringify(report, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `ieca-analytics-${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        
+        utils.showNotification('Analytics data exported successfully!', 'success');
+    }
+}
+
+function refreshAnalytics() {
+    if (window.analyticsManager) {
+        window.analyticsManager.updateDashboard();
+        utils.showNotification('Analytics data refreshed!', 'info');
+    }
+}
+
+function clearAnalytics() {
+    if (confirm('Are you sure you want to clear all analytics data? This action cannot be undone.')) {
+        storage.remove('analytics');
+        utils.showNotification('Analytics data cleared!', 'warning');
+        
+        // Reset dashboard values
+        const elements = {
+            'totalPageViews': '0',
+            'activeSessions': '0',
+            'avgSessionDuration': '0s',
+            'totalApplications': '0',
+            'totalChatMessages': '0',
+            'memberLogins': '0',
+            'contactForms': '0'
+        };
+        
+        Object.entries(elements).forEach(([id, value]) => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = value;
+        });
+    }
+}
+
+// Enhanced Analytics Manager with Dashboard Updates
+class EnhancedAnalyticsManager extends AnalyticsManager {
+    constructor() {
+        super();
+        this.dashboardUpdateInterval = null;
+        this.initializeDashboard();
+    }
+    
+    initializeDashboard() {
+        // Update dashboard every 30 seconds
+        this.dashboardUpdateInterval = setInterval(() => {
+            this.updateDashboard();
+        }, 30000);
+        
+        // Initial dashboard update
+        setTimeout(() => this.updateDashboard(), 1000);
+    }
+    
+    updateDashboard() {
+        const analytics = storage.load('analytics') || {};
+        const applications = storage.load('applications') || [];
+        const chatHistory = storage.load('chat_history') || [];
+        
+        // Update statistics
+        this.updateElement('totalPageViews', analytics.totalPageViews || 0);
+        this.updateElement('activeSessions', analytics.sessions?.length || 0);
+        this.updateElement('avgSessionDuration', `${this.calculateAverageSessionDuration(analytics.sessions || [])}s`);
+        this.updateElement('totalApplications', applications.length);
+        this.updateElement('totalChatMessages', chatHistory.length);
+        this.updateElement('memberLogins', this.getMemberLogins());
+        this.updateElement('contactForms', this.getContactForms());
+        
+        // Animate chart bars
+        this.animateChartBars();
+    }
+    
+    updateElement(id, value) {
+        const element = document.getElementById(id);
+        if (element && element.textContent !== value.toString()) {
+            element.style.transform = 'scale(1.1)';
+            element.textContent = value;
+            setTimeout(() => {
+                element.style.transform = 'scale(1)';
+            }, 200);
+        }
+    }
+    
+    getMemberLogins() {
+        // Simulate member login count
+        return Math.floor(Math.random() * 50) + 10;
+    }
+    
+    getContactForms() {
+        // Simulate contact form submissions
+        return Math.floor(Math.random() * 20) + 5;
+    }
+    
+    animateChartBars() {
+        const chartBars = document.querySelectorAll('.chart-bar');
+        chartBars.forEach((bar, index) => {
+            setTimeout(() => {
+                bar.style.transform = 'scaleY(1.05)';
+                setTimeout(() => {
+                    bar.style.transform = 'scaleY(1)';
+                }, 100);
+            }, index * 50);
+        });
+    }
+    
+    destroy() {
+        if (this.dashboardUpdateInterval) {
+            clearInterval(this.dashboardUpdateInterval);
+        }
+    }
+}
+
+// Gamification System
+class GamificationSystem {
+    constructor() {
+        this.userPoints = 0;
+        this.userLevel = 1;
+        this.achievements = [];
+        this.initializeGamification();
+    }
+    
+    initializeGamification() {
+        this.loadUserProgress();
+        this.setupAchievementSystem();
+    }
+    
+    loadUserProgress() {
+        const progress = storage.load('user_progress') || {
+            points: 0,
+            level: 1,
+            achievements: []
+        };
+        
+        this.userPoints = progress.points;
+        this.userLevel = progress.level;
+        this.achievements = progress.achievements;
+    }
+    
+    saveUserProgress() {
+        storage.save('user_progress', {
+            points: this.userPoints,
+            level: this.userLevel,
+            achievements: this.achievements
+        });
+    }
+    
+    addPoints(points, reason) {
+        this.userPoints += points;
+        
+        // Check for level up
+        const newLevel = Math.floor(this.userPoints / 100) + 1;
+        if (newLevel > this.userLevel) {
+            this.userLevel = newLevel;
+            this.unlockAchievement('level_up', `Reached Level ${newLevel}`);
+            utils.showNotification(`🎉 Level Up! You're now Level ${newLevel}!`, 'success');
+        }
+        
+        // Save progress
+        this.saveUserProgress();
+        
+        // Show points notification
+        utils.showNotification(`+${points} points for ${reason}!`, 'info', 3000);
+    }
+    
+    unlockAchievement(id, title, description = '') {
+        if (!this.achievements.find(a => a.id === id)) {
+            const achievement = {
+                id,
+                title,
+                description,
+                unlockedAt: Date.now()
+            };
+            
+            this.achievements.push(achievement);
+            this.saveUserProgress();
+            
+            utils.showNotification(`🏆 Achievement Unlocked: ${title}!`, 'success', 5000);
+        }
+    }
+    
+    setupAchievementSystem() {
+        // Track various user actions for achievements
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('.btn-primary')) {
+                this.addPoints(10, 'Button Click');
+            }
+        });
+        
+        // First visit achievement
+        if (this.achievements.length === 0) {
+            this.unlockAchievement('first_visit', 'Welcome to IECA', 'Your first visit to our website');
+        }
+        
+        // Form submission achievement
+        document.addEventListener('submit', () => {
+            this.addPoints(50, 'Form Submission');
+            this.unlockAchievement('form_submit', 'Form Submitter', 'Submitted your first form');
+        });
+    }
+    
+    getLeaderboard() {
+        // Simulated leaderboard data
+        return [
+            { name: 'Yashab Alam', role: 'Founder & CEO', score: 2500 },
+            { name: 'Security Expert 1', role: 'Senior Analyst', score: 1800 },
+            { name: 'Security Expert 2', role: 'Penetration Tester', score: 1600 },
+            { name: 'Security Expert 3', role: 'Incident Responder', score: 1400 },
+            { name: 'You', role: 'Member', score: this.userPoints }
+        ].sort((a, b) => b.score - a.score);
+    }
+}
+
+// Update the initialization to use enhanced analytics
+document.addEventListener('DOMContentLoaded', () => {
+    // Replace analyticsManager with enhanced version
+    if (typeof analyticsManager !== 'undefined') {
+        window.analyticsManager = new EnhancedAnalyticsManager();
+        window.gamificationSystem = new GamificationSystem();
+    }
+});
+
+// Initialize all new features

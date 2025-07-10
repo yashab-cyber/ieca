@@ -56,7 +56,9 @@
                 <li><a href="#home" class="nav-link">Home</a></li>
                 <li><a href="#about" class="nav-link">About</a></li>
                 <li><a href="#services" class="nav-link">Services</a></li>
+                <li><a href="#blog" class="nav-link">Blog</a></li>
                 <li><a href="#join" class="nav-link">Join Us</a></li>
+                <li><a href="#members" class="nav-link">Members</a></li>
                 <li><a href="#contact" class="nav-link">Contact</a></li>
             </ul>
             <div class="hamburger">
@@ -245,6 +247,130 @@
                         <li>Security Testing</li>
                         <li>Secure Architecture</li>
                     </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog/News Section -->
+    <section id="blog" class="blog">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">IECA Blog & News</h2>
+                <p class="section-subtitle">Latest Cybersecurity Insights & IECA Updates</p>
+            </div>
+            
+            <div class="blog-content">
+                <div class="blog-categories">
+                    <button class="category-btn active" data-category="all">All Posts</button>
+                    <button class="category-btn" data-category="threats">Threat Intelligence</button>
+                    <button class="category-btn" data-category="tutorials">Tutorials</button>
+                    <button class="category-btn" data-category="updates">IECA Updates</button>
+                    <button class="category-btn" data-category="industry">Industry News</button>
+                </div>
+                
+                <div class="blog-grid" id="blogGrid">
+                    <article class="blog-card" data-category="threats">
+                        <div class="blog-image">
+                            <div class="blog-category">Threat Intelligence</div>
+                            <div class="blog-date">Dec 15, 2024</div>
+                        </div>
+                        <div class="blog-content-text">
+                            <h3>Advanced Persistent Threats Targeting Indian Infrastructure</h3>
+                            <p>Our threat intelligence team has identified sophisticated APT campaigns targeting critical Indian infrastructure. Learn about the latest attack vectors and defensive strategies.</p>
+                            <div class="blog-meta">
+                                <span class="author">IECA Threat Intel Team</span>
+                                <span class="read-time">5 min read</span>
+                            </div>
+                            <a href="#" class="read-more">Read More</a>
+                        </div>
+                    </article>
+                    
+                    <article class="blog-card" data-category="tutorials">
+                        <div class="blog-image">
+                            <div class="blog-category">Tutorial</div>
+                            <div class="blog-date">Dec 12, 2024</div>
+                        </div>
+                        <div class="blog-content-text">
+                            <h3>Setting Up Advanced Network Monitoring with IECA Tools</h3>
+                            <p>Step-by-step guide to implementing comprehensive network monitoring using IECA's custom security tools and open-source solutions.</p>
+                            <div class="blog-meta">
+                                <span class="author">Yashab Alam</span>
+                                <span class="read-time">8 min read</span>
+                            </div>
+                            <a href="#" class="read-more">Read More</a>
+                        </div>
+                    </article>
+                    
+                    <article class="blog-card" data-category="updates">
+                        <div class="blog-image">
+                            <div class="blog-category">IECA Update</div>
+                            <div class="blog-date">Dec 10, 2024</div>
+                        </div>
+                        <div class="blog-content-text">
+                            <h3>IECA Expands Operations: New Regional Centers Announced</h3>
+                            <p>We're excited to announce the opening of new IECA regional centers in Bangalore, Mumbai, and Hyderabad to better serve India's cybersecurity needs.</p>
+                            <div class="blog-meta">
+                                <span class="author">IECA Leadership</span>
+                                <span class="read-time">3 min read</span>
+                            </div>
+                            <a href="#" class="read-more">Read More</a>
+                        </div>
+                    </article>
+                    
+                    <article class="blog-card" data-category="industry">
+                        <div class="blog-image">
+                            <div class="blog-category">Industry News</div>
+                            <div class="blog-date">Dec 8, 2024</div>
+                        </div>
+                        <div class="blog-content-text">
+                            <h3>Cybersecurity Trends to Watch in 2025</h3>
+                            <p>Our analysts predict the top cybersecurity trends for 2025, including AI-powered attacks, quantum computing threats, and emerging defense technologies.</p>
+                            <div class="blog-meta">
+                                <span class="author">IECA Research Team</span>
+                                <span class="read-time">6 min read</span>
+                            </div>
+                            <a href="#" class="read-more">Read More</a>
+                        </div>
+                    </article>
+                    
+                    <article class="blog-card" data-category="tutorials">
+                        <div class="blog-image">
+                            <div class="blog-category">Tutorial</div>
+                            <div class="blog-date">Dec 5, 2024</div>
+                        </div>
+                        <div class="blog-content-text">
+                            <h3>Zero Trust Architecture Implementation Guide</h3>
+                            <p>Complete guide to implementing Zero Trust security architecture in enterprise environments, with practical examples and IECA best practices.</p>
+                            <div class="blog-meta">
+                                <span class="author">IECA Security Architects</span>
+                                <span class="read-time">12 min read</span>
+                            </div>
+                            <a href="#" class="read-more">Read More</a>
+                        </div>
+                    </article>
+                    
+                    <article class="blog-card" data-category="threats">
+                        <div class="blog-image">
+                            <div class="blog-category">Threat Alert</div>
+                            <div class="blog-date">Dec 3, 2024</div>
+                        </div>
+                        <div class="blog-content-text">
+                            <h3>Critical Vulnerability Alert: Immediate Action Required</h3>
+                            <p>IECA has identified a critical vulnerability affecting major software systems. Learn about the threat, its impact, and immediate mitigation steps.</p>
+                            <div class="blog-meta">
+                                <span class="author">IECA Emergency Response</span>
+                                <span class="read-time">4 min read</span>
+                            </div>
+                            <a href="#" class="read-more">Read More</a>
+                        </div>
+                    </article>
+                </div>
+                
+                <div class="blog-pagination">
+                    <button class="pagination-btn" id="prevPage">← Previous</button>
+                    <span class="pagination-info">Page 1 of 3</span>
+                    <button class="pagination-btn" id="nextPage">Next →</button>
                 </div>
             </div>
         </div>
@@ -477,6 +603,387 @@
                         
                         <button type="submit" class="btn btn-primary">Send Message</button>
                     </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Member Portal Section -->
+    <section id="members" class="members-portal">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">IECA Member Portal</h2>
+                <p class="section-subtitle">Exclusive Access for IECA Members</p>
+            </div>
+            
+            <div class="portal-content">
+                <div class="portal-login" id="memberLogin">
+                    <div class="login-card">
+                        <h3>Member Login</h3>
+                        <form id="memberLoginForm">
+                            <div class="form-group">
+                                <label for="memberEmail">Email Address</label>
+                                <input type="email" id="memberEmail" name="memberEmail" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="memberPassword">Password</label>
+                                <input type="password" id="memberPassword" name="memberPassword" required>
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="rememberMe" name="rememberMe">
+                                    <span class="checkmark"></span>
+                                    Remember me
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                            <div class="login-options">
+                                <a href="#" class="forgot-password">Forgot Password?</a>
+                                <a href="#" class="register-link">Not a member? Apply now</a>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="portal-features">
+                        <h3>Member Portal Features</h3>
+                        <div class="features-grid">
+                            <div class="feature-item">
+                                <span class="feature-icon">📚</span>
+                                <div>
+                                    <h4>Training Materials</h4>
+                                    <p>Access exclusive cybersecurity courses and certifications</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">👥</span>
+                                <div>
+                                    <h4>Member Directory</h4>
+                                    <p>Connect with fellow IECA professionals</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">💬</span>
+                                <div>
+                                    <h4>Internal Communication</h4>
+                                    <p>Secure messaging and collaboration tools</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">🔍</span>
+                                <div>
+                                    <h4>Threat Intelligence</h4>
+                                    <p>Real-time security updates and analysis</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">🏆</span>
+                                <div>
+                                    <h4>Achievement System</h4>
+                                    <p>Track your progress and earn recognition</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">📊</span>
+                                <div>
+                                    <h4>Performance Analytics</h4>
+                                    <p>Monitor your contributions and growth</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="portal-dashboard" id="memberDashboard" style="display: none;">
+                    <div class="dashboard-header">
+                        <div class="member-info">
+                            <div class="avatar">JD</div>
+                            <div class="info">
+                                <h3>John Doe</h3>
+                                <p>Senior Security Analyst</p>
+                                <span class="member-level">Level 5 - Expert</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" id="logoutBtn">Logout</button>
+                    </div>
+                    
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <h4>950</h4>
+                            <p>Total Points</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>12</h4>
+                            <p>Certifications</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>45</h4>
+                            <p>Contributions</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>#8</h4>
+                            <p>Leaderboard Rank</p>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-tabs">
+                        <button class="tab-btn active" data-tab="overview">Overview</button>
+                        <button class="tab-btn" data-tab="training">Training</button>
+                        <button class="tab-btn" data-tab="projects">Projects</button>
+                        <button class="tab-btn" data-tab="messages">Messages</button>
+                        <button class="tab-btn" data-tab="achievements">Achievements</button>
+                    </div>
+                    
+                    <div class="dashboard-content">
+                        <div class="tab-content active" id="overview">
+                            <div class="content-grid">
+                                <div class="content-card">
+                                    <h4>Recent Activity</h4>
+                                    <ul class="activity-list">
+                                        <li>Completed "Advanced Penetration Testing" course</li>
+                                        <li>Contributed to Threat Intelligence Report #2024-12</li>
+                                        <li>Earned "Bug Hunter" achievement</li>
+                                        <li>Participated in Emergency Response Training</li>
+                                    </ul>
+                                </div>
+                                <div class="content-card">
+                                    <h4>Upcoming Events</h4>
+                                    <ul class="events-list">
+                                        <li>
+                                            <strong>Dec 20, 2024</strong><br>
+                                            Advanced Malware Analysis Workshop
+                                        </li>
+                                        <li>
+                                            <strong>Dec 25, 2024</strong><br>
+                                            Year-End Security Review Meeting
+                                        </li>
+                                        <li>
+                                            <strong>Jan 5, 2025</strong><br>
+                                            New Year Cybersecurity Summit
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="training">
+                            <div class="training-progress">
+                                <h4>Current Courses</h4>
+                                <div class="course-item">
+                                    <div class="course-info">
+                                        <h5>Advanced Threat Hunting</h5>
+                                        <p>Progress: 75% Complete</p>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress" style="width: 75%"></div>
+                                    </div>
+                                </div>
+                                <div class="course-item">
+                                    <div class="course-info">
+                                        <h5>Cloud Security Architecture</h5>
+                                        <p>Progress: 40% Complete</p>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress" style="width: 40%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="projects">
+                            <div class="projects-list">
+                                <h4>Active Projects</h4>
+                                <div class="project-item">
+                                    <h5>Operation Digital Shield</h5>
+                                    <p>Status: In Progress | Role: Lead Analyst</p>
+                                </div>
+                                <div class="project-item">
+                                    <h5>Banking Sector Security Assessment</h5>
+                                    <p>Status: Under Review | Role: Penetration Tester</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="messages">
+                            <div class="messages-container">
+                                <h4>Recent Messages</h4>
+                                <div class="message-item">
+                                    <strong>IECA Leadership</strong>
+                                    <p>New security protocol updates available...</p>
+                                    <span class="message-time">2 hours ago</span>
+                                </div>
+                                <div class="message-item">
+                                    <strong>Training Department</strong>
+                                    <p>Your certification results are now available...</p>
+                                    <span class="message-time">1 day ago</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="achievements">
+                            <div class="achievements-grid">
+                                <h4>Your Achievements</h4>
+                                <div class="achievement-item earned">
+                                    <span class="achievement-icon">🏆</span>
+                                    <div>
+                                        <h5>Expert Analyst</h5>
+                                        <p>Completed 10+ security assessments</p>
+                                    </div>
+                                </div>
+                                <div class="achievement-item earned">
+                                    <span class="achievement-icon">🎯</span>
+                                    <div>
+                                        <h5>Bug Hunter</h5>
+                                        <p>Discovered critical vulnerabilities</p>
+                                    </div>
+                                </div>
+                                <div class="achievement-item">
+                                    <span class="achievement-icon">🚀</span>
+                                    <div>
+                                        <h5>Team Leader</h5>
+                                        <p>Lead a successful project team</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analytics Dashboard Section (Admin Only) -->
+    <section id="analytics" class="analytics-dashboard" style="display: none;">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">IECA Analytics Dashboard</h2>
+                <p class="section-subtitle">Real-time Website Performance & User Insights</p>
+            </div>
+            
+            <div class="analytics-content">
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3>📊 Website Statistics</h3>
+                        <div class="stat-row">
+                            <span>Total Page Views:</span>
+                            <strong id="totalPageViews">0</strong>
+                        </div>
+                        <div class="stat-row">
+                            <span>Active Sessions:</span>
+                            <strong id="activeSessions">0</strong>
+                        </div>
+                        <div class="stat-row">
+                            <span>Avg. Session Duration:</span>
+                            <strong id="avgSessionDuration">0s</strong>
+                        </div>
+                        <div class="stat-row">
+                            <span>Bounce Rate:</span>
+                            <strong>24%</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-card">
+                        <h3>👥 User Engagement</h3>
+                        <div class="stat-row">
+                            <span>Total Applications:</span>
+                            <strong id="totalApplications">0</strong>
+                        </div>
+                        <div class="stat-row">
+                            <span>Chat Messages:</span>
+                            <strong id="totalChatMessages">0</strong>
+                        </div>
+                        <div class="stat-row">
+                            <span>Member Logins:</span>
+                            <strong id="memberLogins">0</strong>
+                        </div>
+                        <div class="stat-row">
+                            <span>Contact Forms:</span>
+                            <strong id="contactForms">0</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-card">
+                        <h3>🔍 Popular Content</h3>
+                        <div class="content-list">
+                            <div class="content-item">
+                                <span>1. Home Page</span>
+                                <strong>45%</strong>
+                            </div>
+                            <div class="content-item">
+                                <span>2. Services</span>
+                                <strong>22%</strong>
+                            </div>
+                            <div class="content-item">
+                                <span>3. Join IECA</span>
+                                <strong>18%</strong>
+                            </div>
+                            <div class="content-item">
+                                <span>4. Blog</span>
+                                <strong>10%</strong>
+                            </div>
+                            <div class="content-item">
+                                <span>5. Members Portal</span>
+                                <strong>5%</strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-card">
+                        <h3>🌍 Geographic Data</h3>
+                        <div class="geo-list">
+                            <div class="geo-item">
+                                <span>🇮🇳 India</span>
+                                <strong>78%</strong>
+                            </div>
+                            <div class="geo-item">
+                                <span>🇺🇸 United States</span>
+                                <strong>12%</strong>
+                            </div>
+                            <div class="geo-item">
+                                <span>🇬🇧 United Kingdom</span>
+                                <strong>5%</strong>
+                            </div>
+                            <div class="geo-item">
+                                <span>🇨🇦 Canada</span>
+                                <strong>3%</strong>
+                            </div>
+                            <div class="geo-item">
+                                <span>🌏 Others</span>
+                                <strong>2%</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="analytics-charts">
+                    <div class="chart-container">
+                        <h3>📈 Traffic Overview (Last 7 Days)</h3>
+                        <div class="simple-chart">
+                            <div class="chart-bars">
+                                <div class="chart-bar" style="height: 60%;" title="Monday: 120 visitors"></div>
+                                <div class="chart-bar" style="height: 80%;" title="Tuesday: 160 visitors"></div>
+                                <div class="chart-bar" style="height: 45%;" title="Wednesday: 90 visitors"></div>
+                                <div class="chart-bar" style="height: 95%;" title="Thursday: 190 visitors"></div>
+                                <div class="chart-bar" style="height: 70%;" title="Friday: 140 visitors"></div>
+                                <div class="chart-bar" style="height: 40%;" title="Saturday: 80 visitors"></div>
+                                <div class="chart-bar" style="height: 55%;" title="Sunday: 110 visitors"></div>
+                            </div>
+                            <div class="chart-labels">
+                                <span>Mon</span>
+                                <span>Tue</span>
+                                <span>Wed</span>
+                                <span>Thu</span>
+                                <span>Fri</span>
+                                <span>Sat</span>
+                                <span>Sun</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="analytics-actions">
+                    <button class="btn btn-primary" onclick="exportAnalytics()">📊 Export Data</button>
+                    <button class="btn btn-secondary" onclick="refreshAnalytics()">🔄 Refresh</button>
+                    <button class="btn btn-secondary" onclick="clearAnalytics()">🗑️ Clear Data</button>
                 </div>
             </div>
         </div>
