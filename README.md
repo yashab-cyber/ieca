@@ -114,24 +114,6 @@ IECA (Indian Error Cyber Army) is India's premier cybersecurity organization ded
 - **Intersection Observer** for optimized scroll animations
 - **Web APIs** for modern browser features
 
-## File Structure
-
-```
-ieca/
-├── index.html              # Main HTML file with complete website structure
-├── styles/
-│   └── main.css            # Comprehensive stylesheet with cyberpunk theme
-├── scripts/
-│   └── main.js             # Full JavaScript functionality and features
-├── assets/
-│   └── 1752137694206.jpg   # IECA official logo
-├── sw.js                   # Service Worker for PWA functionality
-├── backend-simulation.js   # Backend logic simulation for development
-├── sitemap.xml             # SEO sitemap for search engines
-├── robots.txt              # Search engine crawler instructions
-├── DEPLOYMENT.md           # Complete deployment guide and instructions
-└── README.md               # This comprehensive documentation file
-```
 
 ## 🔧 Setup Instructions
 
