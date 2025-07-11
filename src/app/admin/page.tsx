@@ -1,0 +1,343 @@
+
+'use client'
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { Edit, Trash2, CheckCircle, XCircle, Eye, Star, Mic, Shield } from "lucide-react";
+import React from 'react';
+import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const mockResources = [
+  { id: 1, title: "Threat Intelligence Handbook", author: "Priya Singh", date: "2024-07-20", tags: "threat-intel, osint" },
+  { id: 2, title: "Advanced Penetration Testing Techniques", author: "Arjun Sharma", date: "2024-07-18", tags: "pentesting, red-team" },
+  { id: 3, title: "Cloud Security Best Practices", author: "Ananya Gupta", date: "2024-07-15", tags: "cloud, security" },
+];
+
+const mockApplications = [
+    { id: 1, name: "Rohan Verma", email: "rohan.v@example.com", skills: ["Penetration Testing", "Cloud Security"], date: "2024-07-22", status: "Pending" },
+    { id: 2, name: "Aisha Khan", email: "aisha.k@example.com", skills: ["Digital Forensics", "Incident Response"], date: "2024-07-21", status: "Under Review" },
+    { id: 3, name: "Siddharth Menon", email: "sid.m@example.com", skills: ["Malware Analysis"], date: "2024-07-20", status: "Approved" },
+    { id: 4, name: "Neha Reddy", email: "neha.r@example.com", skills: ["Threat Intelligence", "Penetration Testing"], date: "2024-07-19", status: "Rejected" },
+];
+
+type ApplicationStatus = "Pending" | "Under Review" | "Approved" | "Rejected";
+
+const statusColors: Record<ApplicationStatus, string> = {
+    "Pending": "bg-yellow-500/20 text-yellow-500 border-yellow-500/30",
+    "Under Review": "bg-blue-500/20 text-blue-500 border-blue-500/30",
+    "Approved": "bg-green-500/20 text-green-500 border-green-500/30",
+    "Rejected": "bg-red-500/20 text-red-500 border-red-500/30",
+};
+
+function AdminLogin({ onLogin }: { onLogin: (success: boolean) => void }) {
+  const { toast } = useToast();
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.target as HTMLFormElement);
+    const email = formData.get('email');
+    const password = formData.get('password');
+
+    if (email === 'yashabalam707@gmail.com' && password === '@Ethicalhacker07') {
+      onLogin(true);
+      toast({
+        title: "Login Successful",
+        description: "Welcome to the Admin Dashboard.",
+      });
+    } else {
+      onLogin(false);
+      toast({
+        title: "Login Failed",
+        description: "Invalid email or password. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] bg-secondary/30">
+      <Card className="w-full max-w-md mx-4 shadow-xl">
+        <CardHeader className="text-center">
+          <div className="mx-auto bg-primary/10 text-primary p-3 rounded-full w-fit mb-4">
+            <Shield className="h-8 w-8" />
+          </div>
+          <CardTitle className="text-3xl font-headline text-accent">Admin Panel Access</CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Please enter your credentials to proceed.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="yashabalam707@gmail.com"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input 
+                id="password" 
+                name="password"
+                type="password" 
+                required 
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Authenticate
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+
+export default function AdminPage() {
+    const { toast } = useToast();
+    const [resources, setResources] = React.useState(mockResources);
+    const [applications, setApplications] = React.useState(mockApplications);
+    const [editingResource, setEditingResource] = React.useState<any>(null);
+    const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+
+    if (!isAuthenticated) {
+      return <AdminLogin onLogin={setIsAuthenticated} />;
+    }
+
+    const handleEdit = (resource: any) => {
+        setEditingResource(resource);
+    };
+    
+    const handleDelete = (id: number) => {
+        if(confirm(`Are you sure you want to delete resource ${id}?`)) {
+            setResources(resources.filter(resource => resource.id !== id));
+            toast({ title: "Success", description: `Deleted resource ${id}` });
+        }
+    };
+
+    const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      const formData = new FormData(event.target as HTMLFormElement);
+      const newResource = {
+          id: editingResource ? editingResource.id : Date.now(),
+          title: formData.get('title') as string,
+          author: formData.get('author') as string,
+          imageUrl: formData.get('imageUrl') as string,
+          summary: formData.get('summary') as string,
+          content: formData.get('content') as string,
+          tags: formData.get('tags') as string,
+          date: new Date().toISOString().split('T')[0]
+      };
+
+      if (editingResource) {
+          setResources(resources.map(a => a.id === newResource.id ? newResource : a));
+          toast({ title: "Success", description: "Resource updated successfully!" });
+      } else {
+          setResources([newResource, ...resources]);
+          toast({ title: "Success", description: "New resource published successfully!" });
+      }
+      
+      setEditingResource(null);
+      (event.target as HTMLFormElement).reset();
+    };
+
+    const handleStatusChange = (appId: number, status: ApplicationStatus) => {
+        setApplications(apps => apps.map(app => app.id === appId ? {...app, status} : app));
+        toast({ title: "Status Updated", description: `Application status changed to ${status}.`});
+    }
+
+  return (
+    <div className="container mx-auto py-10">
+      <h1 className="text-3xl font-bold font-headline mb-6">Admin Dashboard</h1>
+
+      <Tabs defaultValue="applications" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 md:w-[600px]">
+          <TabsTrigger value="applications">Manage Applications</TabsTrigger>
+          <TabsTrigger value="content">Manage Library</TabsTrigger>
+          <TabsTrigger value="add">
+            {editingResource ? 'Edit Resource' : 'Add New Resource'}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="applications" className="mt-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Volunteer Applications</CardTitle>
+                    <CardDescription>Review, approve, or reject applications from prospective volunteers.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="rounded-md border">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Applicant</TableHead>
+                                    <TableHead className="hidden md:table-cell">Email</TableHead>
+                                    <TableHead className="hidden lg:table-cell">Date</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {applications.map((app) => (
+                                <TableRow key={app.id}>
+                                    <TableCell className="font-medium">{app.name}</TableCell>
+                                    <TableCell className="hidden md:table-cell text-muted-foreground">{app.email}</TableCell>
+                                    <TableCell className="hidden lg:table-cell text-muted-foreground">{app.date}</TableCell>
+                                    <TableCell>
+                                       <Select defaultValue={app.status} onValueChange={(value: ApplicationStatus) => handleStatusChange(app.id, value)}>
+                                            <SelectTrigger className="w-[150px] text-xs h-8">
+                                                <SelectValue placeholder="Set status" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="Pending">Pending</SelectItem>
+                                                <SelectItem value="Under Review">Under Review</SelectItem>
+                                                <SelectItem value="Approved">Approved</SelectItem>
+                                                <SelectItem value="Rejected">Rejected</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="ghost" size="icon">
+                                            <Eye className="h-4 w-4" />
+                                            <span className="sr-only">View Details</span>
+                                        </Button>
+                                        <Button variant="ghost" size="icon" className="text-green-500 hover:text-green-500">
+                                            <CheckCircle className="h-4 w-4" />
+                                            <span className="sr-only">Approve</span>
+                                        </Button>
+                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                            <XCircle className="h-4 w-4" />
+                                            <span className="sr-only">Reject</span>
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </CardContent>
+            </Card>
+        </TabsContent>
+
+        <TabsContent value="content" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Library Resources</CardTitle>
+              <CardDescription>View, edit, or delete published resources for the member library.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Title</TableHead>
+                      <TableHead className="hidden md:table-cell">Author</TableHead>
+                       <TableHead className="hidden md:table-cell">Tags</TableHead>
+                      <TableHead className="hidden md:table-cell">Date</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {resources.map((resource) => (
+                      <TableRow key={resource.id}>
+                        <TableCell className="font-medium">{resource.title}</TableCell>
+                        <TableCell className="hidden md:table-cell">{resource.author}</TableCell>
+                        <TableCell className="hidden md:table-cell">
+                           <div className="flex gap-1">
+                            {resource.tags?.split(',').map(tag => <Badge key={tag} variant="secondary" className="whitespace-nowrap">{tag.trim()}</Badge>)}
+                           </div>
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">{resource.date}</TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="icon" onClick={() => toast({title: "Bookmark Clicked", description: "This resource has been added to your bookmarks."})}>
+                              <Star className="h-4 w-4" />
+                              <span className="sr-only">Bookmark</span>
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleEdit(resource)}>
+                            <Edit className="h-4 w-4" />
+                            <span className="sr-only">Edit</span>
+                          </Button>
+                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(resource.id)}>
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete</span>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="add" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>{editingResource ? 'Edit Resource' : 'Create a New Resource'}</CardTitle>
+              <CardDescription>
+                {editingResource
+                  ? 'Update the details for the existing resource.'
+                  : 'Fill in the details below to publish a new resource.'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleFormSubmit} className="space-y-6">
+                 <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="title">Resource Title</Label>
+                        <Input id="title" name="title" placeholder="e.g., Advanced Pen Testing" defaultValue={editingResource?.title} required />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="author">Author Name</Label>
+                        <Input id="author" name="author" placeholder="e.g., Arjun Sharma" defaultValue={editingResource?.author} required />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="imageUrl">Image URL</Label>
+                        <Input id="imageUrl" name="imageUrl" placeholder="https://placehold.co/600x400.png" defaultValue={editingResource?.imageUrl} />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="tags">Tags (comma-separated)</Label>
+                        <Input id="tags" name="tags" placeholder="e.g., pentesting, red-team" defaultValue={editingResource?.tags} />
+                    </div>
+                 </div>
+                 <div className="space-y-2">
+                  <Label htmlFor="summary">Summary</Label>
+                  <Textarea id="summary" name="summary" placeholder="A brief summary of the resource..." defaultValue={editingResource?.summary} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="content">Full Content (Markdown supported)</Label>
+                  <Textarea id="content" name="content" placeholder="Write the full resource content here..." className="min-h-[250px]" defaultValue={editingResource?.content} required />
+                </div>
+                 <div className="flex justify-between items-center">
+                    <div className="flex gap-4">
+                        <Button type="submit">{editingResource ? 'Update Resource' : 'Publish Resource'}</Button>
+                        {editingResource && (
+                            <Button variant="outline" onClick={() => { setEditingResource(null); }}>Cancel</Button>
+                        )}
+                    </div>
+                     <Button variant="outline" size="icon" onClick={(e) => {e.preventDefault(); toast({title: "Voice Command Activated", description: "Ready to accept voice input."})}}>
+                        <Mic className="h-4 w-4" />
+                        <span className="sr-only">Use Voice Command</span>
+                    </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
