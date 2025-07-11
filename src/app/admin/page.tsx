@@ -1,4 +1,3 @@
-
 'use client'
 
 import { Button } from "@/components/ui/button";
@@ -27,13 +26,24 @@ const mockApplications = [
     { id: 4, name: "Neha Reddy", email: "neha.r@example.com", skills: ["Threat Intelligence", "Penetration Testing"], date: "2024-07-19", status: "Rejected" },
 ];
 
-type ApplicationStatus = "Pending" | "Under Review" | "Approved" | "Rejected";
+type ApplicationStatus = "PENDING" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
 
 const statusColors: Record<ApplicationStatus, string> = {
-    "Pending": "bg-yellow-500/20 text-yellow-500 border-yellow-500/30",
-    "Under Review": "bg-blue-500/20 text-blue-500 border-blue-500/30",
-    "Approved": "bg-green-500/20 text-green-500 border-green-500/30",
-    "Rejected": "bg-red-500/20 text-red-500 border-red-500/30",
+    "PENDING": "bg-yellow-500/20 text-yellow-500 border-yellow-500/30",
+    "UNDER_REVIEW": "bg-blue-500/20 text-blue-500 border-blue-500/30",
+    "APPROVED": "bg-green-500/20 text-green-500 border-green-500/30",
+    "REJECTED": "bg-red-500/20 text-red-500 border-red-500/30",
+};
+
+// Helper function to convert database status to display format
+const getDisplayStatus = (status: ApplicationStatus): string => {
+    switch (status) {
+        case 'PENDING': return 'Pending';
+        case 'UNDER_REVIEW': return 'Under Review';
+        case 'APPROVED': return 'Approved';
+        case 'REJECTED': return 'Rejected';
+        default: return status;
+    }
 };
 
 function AdminLogin({ onLogin }: { onLogin: (success: boolean) => void }) {
@@ -107,10 +117,91 @@ function AdminLogin({ onLogin }: { onLogin: (success: boolean) => void }) {
 
 export default function AdminPage() {
     const { toast } = useToast();
-    const [resources, setResources] = React.useState(mockResources);
-    const [applications, setApplications] = React.useState(mockApplications);
+    const [resources, setResources] = React.useState<any[]>([]);
+    const [applications, setApplications] = React.useState<any[]>([]);
     const [editingResource, setEditingResource] = React.useState<any>(null);
     const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+    const [loading, setLoading] = React.useState(false);
+
+    // Load data when component mounts and when authenticated
+    React.useEffect(() => {
+        if (isAuthenticated) {
+            loadApplications();
+            loadResources();
+        }
+    }, [isAuthenticated]);
+
+    const loadApplications = async () => {
+        try {
+            const response = await fetch('/api/applications');
+            const data = await response.json();
+            if (data.success) {
+                setApplications(data.applications);
+            }
+        } catch (error) {
+            console.error('Error loading applications:', error);
+            toast({
+                title: "Error",
+                description: "Failed to load applications",
+                variant: "destructive",
+            });
+        }
+    };
+
+    const loadResources = async () => {
+        try {
+            // For now, we'll use mock resources as we haven't implemented resources API yet
+            setResources(mockResources);
+        } catch (error) {
+            console.error('Error loading resources:', error);
+        }
+    };
+
+    const updateApplicationStatus = async (applicationId: string, status: ApplicationStatus) => {
+        try {
+            setLoading(true);
+            const response = await fetch(`/api/applications/${applicationId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status }),
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                // Reload applications to get updated data
+                await loadApplications();
+                toast({
+                    title: "Status Updated",
+                    description: `Application status changed to ${status}`,
+                });
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            console.error('Error updating application:', error);
+            toast({
+                title: "Error",
+                description: "Failed to update application status",
+                variant: "destructive",
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleStatusChange = async (applicationId: string, status: ApplicationStatus) => {
+        await updateApplicationStatus(applicationId, status);
+    };
+
+    const handleApprove = async (applicationId: string) => {
+        await updateApplicationStatus(applicationId, 'APPROVED');
+    };
+
+    const handleReject = async (applicationId: string) => {
+        await updateApplicationStatus(applicationId, 'REJECTED');
+    };
 
     if (!isAuthenticated) {
       return <AdminLogin onLogin={setIsAuthenticated} />;
@@ -153,11 +244,6 @@ export default function AdminPage() {
       (event.target as HTMLFormElement).reset();
     };
 
-    const handleStatusChange = (appId: number, status: ApplicationStatus) => {
-        setApplications(apps => apps.map(app => app.id === appId ? {...app, status} : app));
-        toast({ title: "Status Updated", description: `Application status changed to ${status}.`});
-    }
-
   return (
     <div className="container mx-auto py-10">
       <h1 className="text-3xl font-bold font-headline mb-6">Admin Dashboard</h1>
@@ -194,17 +280,23 @@ export default function AdminPage() {
                                 <TableRow key={app.id}>
                                     <TableCell className="font-medium">{app.name}</TableCell>
                                     <TableCell className="hidden md:table-cell text-muted-foreground">{app.email}</TableCell>
-                                    <TableCell className="hidden lg:table-cell text-muted-foreground">{app.date}</TableCell>
+                                    <TableCell className="hidden lg:table-cell text-muted-foreground">
+                                        {new Date(app.createdAt).toLocaleDateString()}
+                                    </TableCell>
                                     <TableCell>
-                                       <Select defaultValue={app.status} onValueChange={(value: ApplicationStatus) => handleStatusChange(app.id, value)}>
+                                       <Select 
+                                         value={app.status} 
+                                         onValueChange={(value: ApplicationStatus) => handleStatusChange(app.id, value)}
+                                         disabled={loading}
+                                       >
                                             <SelectTrigger className="w-[150px] text-xs h-8">
                                                 <SelectValue placeholder="Set status" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="Pending">Pending</SelectItem>
-                                                <SelectItem value="Under Review">Under Review</SelectItem>
-                                                <SelectItem value="Approved">Approved</SelectItem>
-                                                <SelectItem value="Rejected">Rejected</SelectItem>
+                                                <SelectItem value="PENDING">Pending</SelectItem>
+                                                <SelectItem value="UNDER_REVIEW">Under Review</SelectItem>
+                                                <SelectItem value="APPROVED">Approved</SelectItem>
+                                                <SelectItem value="REJECTED">Rejected</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
@@ -213,11 +305,23 @@ export default function AdminPage() {
                                             <Eye className="h-4 w-4" />
                                             <span className="sr-only">View Details</span>
                                         </Button>
-                                        <Button variant="ghost" size="icon" className="text-green-500 hover:text-green-500">
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="text-green-500 hover:text-green-500"
+                                            onClick={() => handleApprove(app.id)}
+                                            disabled={loading}
+                                        >
                                             <CheckCircle className="h-4 w-4" />
                                             <span className="sr-only">Approve</span>
                                         </Button>
-                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="text-destructive hover:text-destructive"
+                                            onClick={() => handleReject(app.id)}
+                                            disabled={loading}
+                                        >
                                             <XCircle className="h-4 w-4" />
                                             <span className="sr-only">Reject</span>
                                         </Button>
@@ -256,7 +360,7 @@ export default function AdminPage() {
                         <TableCell className="hidden md:table-cell">{resource.author}</TableCell>
                         <TableCell className="hidden md:table-cell">
                            <div className="flex gap-1">
-                            {resource.tags?.split(',').map(tag => <Badge key={tag} variant="secondary" className="whitespace-nowrap">{tag.trim()}</Badge>)}
+                            {resource.tags?.split(',').map((tag: string) => <Badge key={tag} variant="secondary" className="whitespace-nowrap">{tag.trim()}</Badge>)}
                            </div>
                         </TableCell>
                         <TableCell className="hidden md:table-cell">{resource.date}</TableCell>

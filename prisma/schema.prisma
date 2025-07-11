@@ -1,0 +1,277 @@
+// This is your Prisma schema file for IECA (Indian Error Cyber Army)
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication and member management
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String   // Hashed password
+  name        String
+  phone       String?
+  linkedin    String?
+  github      String?
+  role        UserRole @default(MEMBER)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastLoginAt DateTime?
+
+  // Relations
+  profile      UserProfile?
+  applications Application[]
+  chatMessages ChatMessage[]
+  blogPosts    BlogPost[]
+  comments     Comment[]
+  activities   Activity[]
+
+  @@map("users")
+}
+
+// User profile with additional information
+model UserProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  bio          String?
+  avatar       String?
+  skills       String[] // JSON array of skills
+  experience   String?
+  location     String?
+  website      String?
+  isPublic     Boolean  @default(false)
+  joinedAt     DateTime @default(now())
+  reputation   Int      @default(0)
+  points       Int      @default(0)
+  rank         String   @default("Rookie")
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+// Application model for join requests
+model Application {
+  id              String            @id @default(cuid())
+  userId          String?           // Optional - for logged in users
+  name            String
+  email           String
+  phone           String
+  linkedin        String?
+  github          String?
+  skills          String[]          // JSON array of selected skills
+  statement       String
+  isIndianCitizen Boolean
+  status          ApplicationStatus @default(PENDING)
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  reviewNotes     String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("applications")
+}
+
+// Chat messages for the live chat system
+model ChatMessage {
+  id        String      @id @default(cuid())
+  userId    String?     // Optional - for anonymous users
+  message   String
+  response  String?
+  role      MessageRole @default(USER)
+  isRead    Boolean     @default(false)
+  metadata  Json?       // Additional data like IP, user agent, etc.
+  createdAt DateTime    @default(now())
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("chat_messages")
+}
+
+// Blog posts for news and announcements
+model BlogPost {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  content     String
+  excerpt     String?
+  coverImage  String?
+  authorId    String
+  status      PostStatus @default(DRAFT)
+  tags        String[]
+  isPublished Boolean    @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  author   User      @relation(fields: [authorId], references: [id])
+  comments Comment[]
+
+  @@map("blog_posts")
+}
+
+// Comments for blog posts
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  content   String
+  isApproved Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  post BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [userId], references: [id])
+
+  @@map("comments")
+}
+
+// Resources for cybersecurity materials
+model Resource {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  content     String?
+  fileUrl     String?
+  category    String
+  tags        String[]
+  authorName  String
+  difficulty  Difficulty   @default(BEGINNER)
+  status      PostStatus   @default(DRAFT)
+  downloads   Int          @default(0)
+  views       Int          @default(0)
+  rating      Float        @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("resources")
+}
+
+// Activity logs for tracking user actions
+model Activity {
+  id          String       @id @default(cuid())
+  userId      String
+  action      ActivityType
+  description String
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime     @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("activities")
+}
+
+// Contact form submissions
+model ContactForm {
+  id        String      @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  type      ContactType @default(GENERAL)
+  status    FormStatus  @default(UNREAD)
+  isUrgent  Boolean     @default(false)
+  createdAt DateTime    @default(now())
+
+  @@map("contact_forms")
+}
+
+// System notifications
+model Notification {
+  id        String           @id @default(cuid())
+  title     String
+  message   String
+  type      NotificationType
+  isGlobal  Boolean          @default(false)
+  isRead    Boolean          @default(false)
+  expiresAt DateTime?
+  createdAt DateTime         @default(now())
+
+  @@map("notifications")
+}
+
+// Enums
+enum UserRole {
+  ADMIN
+  MODERATOR
+  MEMBER
+  PENDING
+}
+
+enum ApplicationStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum MessageRole {
+  USER
+  MODEL
+  SYSTEM
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum ActivityType {
+  LOGIN
+  LOGOUT
+  PROFILE_UPDATE
+  APPLICATION_SUBMIT
+  CHAT_MESSAGE
+  RESOURCE_DOWNLOAD
+  BLOG_POST_CREATE
+  COMMENT_CREATE
+}
+
+enum ContactType {
+  GENERAL
+  THREAT_REPORT
+  SUPPORT
+  PARTNERSHIP
+  MEDIA
+}
+
+enum FormStatus {
+  UNREAD
+  READ
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  ERROR
+  SUCCESS
+  SECURITY_ALERT
+}

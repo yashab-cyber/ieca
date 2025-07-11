@@ -1,5 +1,6 @@
 
 'use client';
+import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -49,6 +50,38 @@ const priorityColors: Record<string, string> = {
 }
 
 export default function AnalyticsPage() {
+  const [dashboardStats, setDashboardStats] = React.useState<any>(null);
+  const [applicationStats, setApplicationStats] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    loadAnalyticsData();
+  }, []);
+
+  const loadAnalyticsData = async () => {
+    try {
+      setLoading(true);
+      
+      // Load dashboard stats
+      const dashboardResponse = await fetch('/api/analytics?type=dashboard');
+      const dashboardData = await dashboardResponse.json();
+      if (dashboardData.success) {
+        setDashboardStats(dashboardData.data);
+      }
+
+      // Load application stats
+      const appResponse = await fetch('/api/analytics?type=applications');
+      const appData = await appResponse.json();
+      if (appData.success) {
+        setApplicationStats(appData.data);
+      }
+
+    } catch (error) {
+      console.error('Error loading analytics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="container mx-auto py-12 md:py-20">
        <div className="text-center mb-12">
@@ -58,48 +91,56 @@ export default function AnalyticsPage() {
         </p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Visitors</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">12,234</div>
-                <p className="text-xs text-muted-foreground">+20.1% from last month</p>
-            </CardContent>
-        </Card>
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Applications</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">+235</div>
-                <p className="text-xs text-muted-foreground">+180.1% from last month</p>
-            </CardContent>
-        </Card>
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">12.5%</div>
-                <p className="text-xs text-muted-foreground">+2.5% from last month</p>
-            </CardContent>
-        </Card>
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Security Alerts</CardTitle>
-                <AlertCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">5</div>
-                <p className="text-xs text-muted-foreground">In the last 24 hours</p>
-            </CardContent>
-        </Card>
-      </div>
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="text-lg">Loading analytics...</div>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Members</CardTitle>
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">{dashboardStats?.totalUsers || 0}</div>
+                    <p className="text-xs text-muted-foreground">Active IECA members</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Applications</CardTitle>
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">{dashboardStats?.totalApplications || 0}</div>
+                    <p className="text-xs text-muted-foreground">Total received</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Approval Rate</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">
+                      {applicationStats?.approvalRate ? `${applicationStats.approvalRate.toFixed(1)}%` : '0%'}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Applications approved</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Chat Messages</CardTitle>
+                    <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">{dashboardStats?.totalChatMessages || 0}</div>
+                    <p className="text-xs text-muted-foreground">Total conversations</p>
+                </CardContent>
+            </Card>
+          </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <Card className="col-span-1 lg:col-span-2">
@@ -203,7 +244,8 @@ export default function AnalyticsPage() {
           </div>
         </CardContent>
       </Card>
-
+        </>
+      )}
     </div>
   );
 }

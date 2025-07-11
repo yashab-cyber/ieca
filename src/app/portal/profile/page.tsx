@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Upload, Award, Target, ShieldCheck, Zap } from "lucide-react";
+import React from 'react';
 
 const skills = [
   { id: "pentesting", label: "Penetration Testing" },
@@ -49,26 +50,104 @@ const profileSchema = z.object({
 
 export default function ProfilePage() {
   const { toast } = useToast();
+  const [loading, setLoading] = React.useState(false);
+  const [profileLoading, setProfileLoading] = React.useState(true);
 
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: "Priya Singh",
-      email: "priya.singh@example.com",
-      phone: "+91 98765 43211",
-      linkedin: "https://linkedin.com/in/priyasingh",
-      github: "https://github.com/priyasingh",
-      skills: ["threat", "osint", "forensics"],
-      bio: "Head of Threat Intelligence at IECA, specializing in Open-Source Intelligence and proactive threat hunting to safeguard India's digital assets. Passionate about mentoring the next generation of cybersecurity professionals.",
+      name: "",
+      email: "",
+      phone: "",
+      linkedin: "",
+      github: "",
+      skills: [],
+      bio: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof profileSchema>) {
-    console.log(values);
-    toast({
-      title: "Profile Updated",
-      description: "Your information has been successfully saved.",
-    });
+  // Load user profile on component mount
+  React.useEffect(() => {
+    loadUserProfile();
+  }, []);
+
+  const loadUserProfile = async () => {
+    try {
+      setProfileLoading(true);
+      const response = await fetch('/api/user/profile');
+      const data = await response.json();
+      
+      if (data.success) {
+        const user = data.user;
+        form.reset({
+          name: user.name || "",
+          email: user.email || "",
+          phone: user.phone || "",
+          linkedin: user.linkedin || "",
+          github: user.github || "",
+          skills: user.skills || [],
+          bio: user.bio || "",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to load profile data",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+      toast({
+        title: "Error",
+        description: "Unable to load profile data",
+        variant: "destructive",
+      });
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  async function onSubmit(values: z.infer<typeof profileSchema>) {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: "Profile Updated",
+          description: "Your information has been successfully saved.",
+        });
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (profileLoading) {
+    return (
+      <div className="container mx-auto py-12 md:py-20">
+        <div className="text-center">
+          <div className="text-lg">Loading profile...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -245,7 +324,9 @@ export default function ProfilePage() {
           </Card>
           
           <div className="flex justify-end">
-            <Button type="submit" size="lg">Save Changes</Button>
+            <Button type="submit" size="lg" disabled={loading}>
+              {loading ? "Saving..." : "Save Changes"}
+            </Button>
           </div>
         </form>
       </Form>

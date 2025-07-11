@@ -47,22 +47,26 @@ const formSchema = z.object({
 // This is a placeholder for a real email sending function.
 // In a production app, this would use a service like Resend, SendGrid, or AWS SES.
 async function sendApplicationEmails(data: z.infer<typeof formSchema>) {
-  console.log("--- Sending Application Confirmation Email ---");
-  console.log("To:", data.email);
-  console.log("From: noreply@ieca.gov.in");
-  console.log("Subject: Your IECA Volunteer Application has been received");
-  console.log("Body:", `Hi ${data.name},\n\nThank you for applying to join the Indian Error Cyber Army. We have received your application and our volunteer review board will assess it shortly.\n\nWe appreciate your commitment to helping secure India's digital future.\n\nRegards,\nThe IECA Team`);
-  
-  console.log("\n--- Sending Admin Notification Email ---");
-  console.log("To: admin@ieca.gov.in");
-  console.log("From: system@ieca.gov.in");
-  console.log("Subject: New Volunteer Application Received");
-  console.log("Body:", `A new application has been submitted by ${data.name} (${data.email}). Please review it in the admin dashboard.`);
-  
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  console.log("--- Emails Sent (Simulated) ---");
-  return { success: true };
+  try {
+    const response = await fetch('/api/applications', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to submit application');
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Application submission error:', error);
+    throw error;
+  }
 }
 
 export default function JoinPage() {

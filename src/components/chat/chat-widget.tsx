@@ -74,8 +74,24 @@ export function ChatWidget() {
     setIsLoading(true);
 
     try {
-      const response = await chat({ history: newMessages });
-      const assistantMessage: Message = { role: 'model', content: response };
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userMessageContent,
+          history: messages,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to get response');
+      }
+
+      const assistantMessage: Message = { role: 'model', content: result.response };
       setMessages(prevMessages => [...prevMessages, assistantMessage]);
     } catch (error) {
       console.error("Chat error:", error);

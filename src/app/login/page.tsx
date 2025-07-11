@@ -8,20 +8,57 @@ import { Label } from "@/components/ui/label";
 import { Shield } from "lucide-react";
 import Link from "next/link";
 import React from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage({ onLogin }: { onLogin: (success: boolean) => void }) {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const [isLoading, setIsLoading] = React.useState(false);
+  const { toast } = useToast();
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.target as HTMLFormElement);
-    const email = formData.get('email');
-    const password = formData.get('password');
+    setIsLoading(true);
     
-    // In a real application, you would handle authentication here.
-    // For this prototype, we'll just check for mock credentials.
-    if (email === 'test.volunteer@ieca.gov.in' && password === 'password123') {
+    const formData = new FormData(event.target as HTMLFormElement);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Store user info in localStorage for session management
+        localStorage.setItem('user', JSON.stringify(result.user));
         onLogin(true);
-    } else {
+        toast({
+          title: "Login Successful",
+          description: `Welcome back, ${result.user.name}!`,
+        });
+      } else {
         onLogin(false);
+        toast({
+          title: "Login Failed",
+          description: result.message || "Invalid email or password.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      onLogin(false);
+      toast({
+        title: "Error",
+        description: "Unable to connect to server. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -47,7 +84,7 @@ export default function LoginPage({ onLogin }: { onLogin: (success: boolean) => 
                 type="email"
                 placeholder="volunteer@ieca.gov.in"
                 required
-                defaultValue="test.volunteer@ieca.gov.in"
+                defaultValue="yashabalam707@gmail.com"
               />
             </div>
             <div className="space-y-2">
@@ -57,11 +94,11 @@ export default function LoginPage({ onLogin }: { onLogin: (success: boolean) => 
                 name="password"
                 type="password" 
                 required 
-                defaultValue="password123"
+                defaultValue="@Ethicalhacker07"
               />
             </div>
-            <Button type="submit" className="w-full">
-              Secure Login
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Authenticating..." : "Secure Login"}
             </Button>
           </form>
         </CardContent>
