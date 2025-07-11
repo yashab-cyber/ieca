@@ -1,102 +1,163 @@
+'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Loader2, Download } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 
-const resources = [
-  {
-    title: "Threat Intelligence Handbook",
-    summary: "A comprehensive guide to Open-Source Intelligence (OSINT) and proactive threat hunting techniques, essential for modern cybersecurity professionals.",
-    author: "Priya Singh",
-    date: "July 20, 2024",
-    imageUrl: "https://placehold.co/600x400.png",
-    hint: "intelligence data",
-    tags: ["threat-intel", "osint", "handbook"]
-  },
-  {
-    title: "Advanced Penetration Testing Techniques",
-    summary: "Explore cutting-edge methods for network and application penetration testing, including exploit development and advanced evasion tactics.",
-    author: "Arjun Sharma",
-    date: "July 18, 2024",
-    imageUrl: "https://placehold.co/600x400.png",
-    hint: "binary code",
-    tags: ["pentesting", "red-team", "exploits"]
-  },
-  {
-    title: "Mastering Cloud Security on AWS & Azure",
-    summary: "A deep dive into securing cloud infrastructure. Covers IAM policies, network security groups, and best practices for a multi-cloud environment.",
-    author: "Ananya Gupta",
-    date: "July 15, 2024",
-    imageUrl: "https://placehold.co/600x400.png",
-    hint: "cloud network",
-    tags: ["cloud-security", "aws", "azure"]
-  },
-  {
-    title: "IoT Hacking: A Practical Guide",
-    summary: "Learn to identify and exploit vulnerabilities in Internet of Things devices, from smart home gadgets to industrial control systems.",
-    author: "Vikram Rathore",
-    date: "July 12, 2024",
-    imageUrl: "https://placehold.co/600x400.png",
-    hint: "iot internet",
-    tags: ["iot", "hacking", "vulnerabilities"]
-  },
-   {
-    title: "Digital Forensics & Incident Response Playbook",
-    summary: "Step-by-step procedures for handling security incidents, from initial detection to evidence collection and post-incident analysis.",
-    author: "Priya Singh",
-    date: "July 10, 2024",
-    imageUrl: "https://placehold.co/600x400.png",
-    hint: "forensics investigation",
-    tags: ["dfir", "incident-response", "playbook"]
-  },
-   {
-    title: "Secure Coding Standards for Web Applications",
-    summary: "A CISO's guide to implementing secure coding practices across the development lifecycle to prevent common vulnerabilities like XSS and SQLi.",
-    author: "Arjun Sharma",
-    date: "July 08, 2024",
-    imageUrl: "https://placehold.co/600x400.png",
-    hint: "web development",
-    tags: ["secure-coding", "devsecops", "ciso"]
-  },
-];
+interface Resource {
+  id: string;
+  title: string;
+  description: string;
+  content: string;
+  category: string;
+  tags: string[];
+  authorName: string;
+  difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  views: number;
+  downloads: number;
+  rating: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function LibraryPage() {
-  return (
-    <div className="container mx-auto py-12 md:py-20">
-      <div className="text-center mb-12">
-        <div className="mx-auto bg-primary/10 text-primary p-3 rounded-full w-fit mb-4">
-            <BookOpen className="h-8 w-8" />
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchResources = async () => {
+      try {
+        const response = await fetch('/api/resources');
+        if (!response.ok) {
+          throw new Error('Failed to fetch resources');
+        }
+        const data = await response.json();
+        if (data.success) {
+          setResources(data.data);
+        } else {
+          setError(data.message || 'Failed to load resources');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResources();
+  }, []);
+
+  const handleDownload = async (resourceId: string) => {
+    try {
+      // Increment download count
+      await fetch(`/api/resources/${resourceId}/download`, {
+        method: 'POST',
+      });
+      
+      // Update local state
+      setResources(prev => prev.map(resource => 
+        resource.id === resourceId 
+          ? { ...resource, downloads: resource.downloads + 1 }
+          : resource
+      ));
+    } catch (err) {
+      console.error('Download error:', err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-12">
+        <div className="text-center">
+          <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary mb-4" />
+          <p className="text-muted-foreground">Loading resources...</p>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold font-headline text-accent">Member Knowledge Base</h1>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-12">
+        <div className="text-center">
+          <BookOpen className="mx-auto h-12 w-12 text-red-500 mb-4" />
+          <h1 className="text-2xl font-bold text-red-600 mb-2">Error Loading Resources</h1>
+          <p className="text-muted-foreground">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto py-12">
+      <div className="text-center mb-12">
+        <BookOpen className="mx-auto h-12 w-12 text-primary mb-4" />
+        <h1 className="text-4xl md:text-5xl font-bold font-headline text-accent">Knowledge Library</h1>
         <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
-          An exclusive collection of resources, handbooks, and training materials curated for IECA volunteers.
+          Access exclusive resources, training materials, and research from our cybersecurity experts.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {resources.map((resource, index) => (
-          <Card key={index} className="flex flex-col overflow-hidden hover:shadow-lg transition-shadow duration-300 bg-card">
-            <div className="relative h-48 w-full">
-              <Image src={resource.imageUrl} alt={resource.title} fill style={{objectFit: "cover"}} data-ai-hint={resource.hint} />
+        {resources.map((resource) => (
+          <Card key={resource.id} className="overflow-hidden">
+            <div className="aspect-video bg-muted relative">
+              <Image
+                src="https://placehold.co/600x400.png"
+                alt={resource.title}
+                fill
+                className="object-cover"
+              />
             </div>
             <CardHeader>
-              <CardTitle className="font-headline text-xl leading-tight">{resource.title}</CardTitle>
-               <div className="flex flex-wrap gap-2 pt-2">
-                {resource.tags.map(tag => (
-                  <Badge key={tag} variant="secondary">{tag}</Badge>
+              <div className="flex justify-between items-start mb-2">
+                <Badge variant="secondary">{resource.category}</Badge>
+                <Badge variant="outline">{resource.difficulty}</Badge>
+              </div>
+              <CardTitle className="line-clamp-2">{resource.title}</CardTitle>
+              <CardDescription className="line-clamp-3">
+                {resource.description}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {resource.tags.map((tag, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">
+                    {tag}
+                  </Badge>
                 ))}
               </div>
-            </CardHeader>
-            <CardContent className="flex-grow">
-              <CardDescription>{resource.summary}</CardDescription>
+              <div className="flex justify-between items-center text-sm text-muted-foreground mb-4">
+                <span>By {resource.authorName}</span>
+                <span>{resource.views} views</span>
+              </div>
             </CardContent>
-            <CardFooter className="text-sm text-muted-foreground">
-              <p>By {resource.author} on {resource.date}</p>
+            <CardFooter>
+              <Button 
+                onClick={() => handleDownload(resource.id)}
+                className="w-full"
+                variant="outline"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Download ({resource.downloads})
+              </Button>
             </CardFooter>
           </Card>
         ))}
       </div>
+      
+      {resources.length === 0 && !loading && (
+        <div className="text-center py-12">
+          <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold mb-2">No Resources Available</h3>
+          <p className="text-muted-foreground">Check back later for new resources.</p>
+        </div>
+      )}
     </div>
   );
 }

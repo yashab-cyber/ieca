@@ -79,6 +79,18 @@ export const userService = {
     });
   },
 
+  // Get all users (admin function)
+  async getAllUsers() {
+    return prisma.user.findMany({
+      include: {
+        profile: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  },
+
   // Get all members for directory
   async getMembers() {
     return prisma.user.findMany({

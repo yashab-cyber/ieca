@@ -20,18 +20,28 @@ const formSchema = z.object({
   message: z.string().min(10, "Message must be less than 500 characters.").max(500, "Message must be less than 500 characters."),
 });
 
-// This is a placeholder for a real email sending function.
-// In a production app, you would use a service like Resend, SendGrid, or AWS SES.
+// Send contact form data to API
 async function sendContactEmail(data: z.infer<typeof formSchema>) {
-  console.log("--- Sending Contact Email ---");
-  console.log("To: admin@ieca.gov.in");
-  console.log("From: system@ieca.gov.in");
-  console.log("Subject:", data.subject);
-  console.log("Body:", `New message from ${data.name} (${data.email}):\n\n${data.message}`);
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  console.log("--- Email Sent (Simulated) ---");
-  return { success: true };
+  try {
+    const response = await fetch('/api/contact', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to send message');
+    }
+
+    return { success: true, data: result };
+  } catch (error) {
+    console.error('Error sending contact message:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to send message' };
+  }
 }
 
 export default function ContactPage() {
@@ -49,14 +59,17 @@ export default function ContactPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      // Here you would call your actual email sending service
-      await sendContactEmail(values);
+      const result = await sendContactEmail(values);
 
-      toast({
-        title: "Message Received!",
-        description: "Thank you for reaching out. Our volunteer team will review your message and get back to you shortly.",
-      });
-      form.reset();
+      if (result.success) {
+        toast({
+          title: "Message Received!",
+          description: "Thank you for reaching out. Our volunteer team will review your message and get back to you shortly.",
+        });
+        form.reset();
+      } else {
+        throw new Error(result.error || 'Failed to send message');
+      }
     } catch (error) {
       console.error("Failed to send message:", error);
       toast({

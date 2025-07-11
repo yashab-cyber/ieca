@@ -13,19 +13,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const mockResources = [
-  { id: 1, title: "Threat Intelligence Handbook", author: "Priya Singh", date: "2024-07-20", tags: "threat-intel, osint" },
-  { id: 2, title: "Advanced Penetration Testing Techniques", author: "Arjun Sharma", date: "2024-07-18", tags: "pentesting, red-team" },
-  { id: 3, title: "Cloud Security Best Practices", author: "Ananya Gupta", date: "2024-07-15", tags: "cloud, security" },
-];
-
-const mockApplications = [
-    { id: 1, name: "Rohan Verma", email: "rohan.v@example.com", skills: ["Penetration Testing", "Cloud Security"], date: "2024-07-22", status: "Pending" },
-    { id: 2, name: "Aisha Khan", email: "aisha.k@example.com", skills: ["Digital Forensics", "Incident Response"], date: "2024-07-21", status: "Under Review" },
-    { id: 3, name: "Siddharth Menon", email: "sid.m@example.com", skills: ["Malware Analysis"], date: "2024-07-20", status: "Approved" },
-    { id: 4, name: "Neha Reddy", email: "neha.r@example.com", skills: ["Threat Intelligence", "Penetration Testing"], date: "2024-07-19", status: "Rejected" },
-];
-
 type ApplicationStatus = "PENDING" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
 
 const statusColors: Record<ApplicationStatus, string> = {
@@ -150,10 +137,20 @@ export default function AdminPage() {
 
     const loadResources = async () => {
         try {
-            // For now, we'll use mock resources as we haven't implemented resources API yet
-            setResources(mockResources);
+            const response = await fetch('/api/resources');
+            const result = await response.json();
+            if (result.success) {
+                setResources(result.data);
+            } else {
+                throw new Error(result.message);
+            }
         } catch (error) {
             console.error('Error loading resources:', error);
+            toast({
+                title: "Error",
+                description: "Failed to load resources",
+                variant: "destructive",
+            });
         }
     };
 
@@ -211,37 +208,95 @@ export default function AdminPage() {
         setEditingResource(resource);
     };
     
-    const handleDelete = (id: number) => {
-        if(confirm(`Are you sure you want to delete resource ${id}?`)) {
-            setResources(resources.filter(resource => resource.id !== id));
-            toast({ title: "Success", description: `Deleted resource ${id}` });
+    const handleDelete = async (id: string) => {
+        if(confirm(`Are you sure you want to delete this resource?`)) {
+            try {
+                setLoading(true);
+                const response = await fetch(`/api/resources/${id}`, {
+                    method: 'DELETE',
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    await loadResources(); // Reload resources
+                    toast({ 
+                        title: "Success", 
+                        description: "Resource deleted successfully!" 
+                    });
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Error deleting resource:', error);
+                toast({
+                    title: "Error",
+                    description: "Failed to delete resource",
+                    variant: "destructive",
+                });
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
-    const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       const formData = new FormData(event.target as HTMLFormElement);
-      const newResource = {
-          id: editingResource ? editingResource.id : Date.now(),
+      
+      const resourceData = {
           title: formData.get('title') as string,
-          author: formData.get('author') as string,
-          imageUrl: formData.get('imageUrl') as string,
-          summary: formData.get('summary') as string,
+          description: formData.get('summary') as string,
           content: formData.get('content') as string,
-          tags: formData.get('tags') as string,
-          date: new Date().toISOString().split('T')[0]
+          category: formData.get('category') as string || 'General',
+          tags: (formData.get('tags') as string)?.split(',').map(tag => tag.trim()) || [],
+          authorName: formData.get('author') as string,
+          difficulty: (formData.get('difficulty') as string || 'BEGINNER') as 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED',
       };
 
-      if (editingResource) {
-          setResources(resources.map(a => a.id === newResource.id ? newResource : a));
-          toast({ title: "Success", description: "Resource updated successfully!" });
-      } else {
-          setResources([newResource, ...resources]);
-          toast({ title: "Success", description: "New resource published successfully!" });
+      try {
+          setLoading(true);
+          let response;
+          
+          if (editingResource) {
+              response = await fetch(`/api/resources/${editingResource.id}`, {
+                  method: 'PUT',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(resourceData),
+              });
+          } else {
+              response = await fetch('/api/resources', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(resourceData),
+              });
+          }
+
+          const result = await response.json();
+          if (result.success) {
+              await loadResources(); // Reload resources
+              toast({ 
+                  title: "Success", 
+                  description: editingResource ? "Resource updated successfully!" : "New resource published successfully!" 
+              });
+              setEditingResource(null);
+              (event.target as HTMLFormElement).reset();
+          } else {
+              throw new Error(result.message);
+          }
+      } catch (error) {
+          console.error('Error saving resource:', error);
+          toast({
+              title: "Error",
+              description: "Failed to save resource",
+              variant: "destructive",
+          });
+      } finally {
+          setLoading(false);
       }
-      
-      setEditingResource(null);
-      (event.target as HTMLFormElement).reset();
     };
 
   return (
