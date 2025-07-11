@@ -19,6 +19,7 @@ export async function PATCH(
     const updatedApplication = await applicationService.updateApplicationStatus(
       applicationId,
       status,
+      'admin', // TODO: Get actual admin user ID from authentication
       reviewNotes || ''
     );
 

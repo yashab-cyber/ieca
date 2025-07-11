@@ -9,6 +9,15 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Enable standalone output for Docker
+  output: 'standalone',
+  // Enable compression
+  compress: true,
+  // Enable experimental features
+  experimental: {
+    // Enable server components logging
+    serverComponentsExternalPackages: ['@prisma/client'],
+  },
   images: {
     remotePatterns: [
       {
@@ -18,6 +27,34 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    // Optimize images
+    formats: ['image/webp', 'image/avif'],
+  },
+  // Security headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+    ];
   },
 };
 

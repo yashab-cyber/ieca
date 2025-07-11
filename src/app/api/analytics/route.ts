@@ -31,12 +31,36 @@ export async function GET(request: NextRequest) {
           data: userGrowth,
         });
 
+      case 'chat':
+        const chatAnalytics = await analyticsService.getChatAnalytics();
+        return NextResponse.json({
+          success: true,
+          data: chatAnalytics,
+        });
+
+      case 'security':
+        const securityAnalytics = await analyticsService.getSecurityAnalytics();
+        return NextResponse.json({
+          success: true,
+          data: securityAnalytics,
+        });
+
+      case 'resources':
+        const resourceAnalytics = await analyticsService.getResourceAnalytics();
+        return NextResponse.json({
+          success: true,
+          data: resourceAnalytics,
+        });
+
       default:
         // Return all analytics data
-        const [dashboard, applications, growth] = await Promise.all([
+        const [dashboard, applications, growth, chat, security, resources] = await Promise.all([
           analyticsService.getDashboardStats(),
           analyticsService.getApplicationStats(),
           analyticsService.getUserGrowth(30),
+          analyticsService.getChatAnalytics(),
+          analyticsService.getSecurityAnalytics(),
+          analyticsService.getResourceAnalytics(),
         ]);
 
         return NextResponse.json({
@@ -45,6 +69,9 @@ export async function GET(request: NextRequest) {
             dashboard,
             applications,
             growth,
+            chat,
+            security,
+            resources,
           },
         });
     }

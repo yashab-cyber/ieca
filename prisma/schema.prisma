@@ -26,12 +26,18 @@ model User {
   lastLoginAt DateTime?
 
   // Relations
-  profile      UserProfile?
-  applications Application[]
-  chatMessages ChatMessage[]
-  blogPosts    BlogPost[]
-  comments     Comment[]
-  activities   Activity[]
+  profile           UserProfile?
+  applications      Application[]
+  chatMessages      ChatMessage[]
+  blogPosts         BlogPost[]
+  comments          Comment[]
+  activities        Activity[]
+  
+  // Global Chat Relations
+  createdRooms      GlobalChatRoom[]      @relation("CreatedRooms")
+  sentMessages      GlobalChatMessage[]   @relation("SentMessages")
+  chatMemberships   GlobalChatMember[]    @relation("ChatMemberships")
+  messageReactions  GlobalChatReaction[]  @relation("MessageReactions")
 
   @@map("users")
 }
@@ -274,4 +280,105 @@ enum NotificationType {
   ERROR
   SUCCESS
   SECURITY_ALERT
+}
+
+// Global Chat System Models
+model GlobalChatRoom {
+  id          String            @id @default(cuid())
+  name        String
+  description String?
+  isPrivate   Boolean           @default(false)
+  createdBy   String
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  // Relations
+  creator     User              @relation("CreatedRooms", fields: [createdBy], references: [id])
+  messages    GlobalChatMessage[]
+  members     GlobalChatMember[]
+  
+  @@map("global_chat_rooms")
+}
+
+model GlobalChatMessage {
+  id          String              @id @default(cuid())
+  roomId      String
+  userId      String
+  content     String?
+  messageType GlobalMessageType   @default(TEXT)
+  isEdited    Boolean             @default(false)
+  replyToId   String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  
+  // Relations
+  room        GlobalChatRoom      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user        User                @relation("SentMessages", fields: [userId], references: [id])
+  replyTo     GlobalChatMessage?  @relation("MessageReplies", fields: [replyToId], references: [id])
+  replies     GlobalChatMessage[] @relation("MessageReplies")
+  attachments GlobalChatAttachment[]
+  reactions   GlobalChatReaction[]
+  
+  @@map("global_chat_messages")
+}
+
+model GlobalChatAttachment {
+  id          String            @id @default(cuid())
+  messageId   String
+  fileName    String
+  originalName String
+  mimeType    String
+  fileSize    Int
+  downloadUrl String
+  uploadedAt  DateTime          @default(now())
+  
+  // Relations
+  message     GlobalChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  
+  @@map("global_chat_attachments")
+}
+
+model GlobalChatMember {
+  id          String         @id @default(cuid())
+  roomId      String
+  userId      String
+  role        ChatMemberRole @default(MEMBER)
+  joinedAt    DateTime       @default(now())
+  lastSeenAt  DateTime?
+  
+  // Relations
+  room        GlobalChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user        User           @relation("ChatMemberships", fields: [userId], references: [id])
+  
+  @@unique([roomId, userId])
+  @@map("global_chat_members")
+}
+
+model GlobalChatReaction {
+  id        String            @id @default(cuid())
+  messageId String
+  userId    String
+  emoji     String
+  createdAt DateTime          @default(now())
+  
+  // Relations
+  message   GlobalChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User              @relation("MessageReactions", fields: [userId], references: [id])
+  
+  @@unique([messageId, userId, emoji])
+  @@map("global_chat_reactions")
+}
+
+enum GlobalMessageType {
+  TEXT
+  FILE
+  IMAGE
+  CODE
+  DOCUMENT
+}
+
+enum ChatMemberRole {
+  ADMIN
+  MODERATOR
+  MEMBER
 }

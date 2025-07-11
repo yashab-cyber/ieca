@@ -12,6 +12,7 @@ import React from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type ApplicationStatus = "PENDING" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
 
@@ -106,6 +107,9 @@ export default function AdminPage() {
     const { toast } = useToast();
     const [resources, setResources] = React.useState<any[]>([]);
     const [applications, setApplications] = React.useState<any[]>([]);
+    const [contactForms, setContactForms] = React.useState<any[]>([]);
+    const [selectedContact, setSelectedContact] = React.useState<any>(null);
+    const [isContactDialogOpen, setIsContactDialogOpen] = React.useState(false);
     const [editingResource, setEditingResource] = React.useState<any>(null);
     const [isAuthenticated, setIsAuthenticated] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
@@ -115,6 +119,7 @@ export default function AdminPage() {
         if (isAuthenticated) {
             loadApplications();
             loadResources();
+            loadContactForms();
         }
     }, [isAuthenticated]);
 
@@ -149,6 +154,25 @@ export default function AdminPage() {
             toast({
                 title: "Error",
                 description: "Failed to load resources",
+                variant: "destructive",
+            });
+        }
+    };
+
+    const loadContactForms = async () => {
+        try {
+            const response = await fetch('/api/contact');
+            const result = await response.json();
+            if (result.success) {
+                setContactForms(result.contacts);
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            console.error('Error loading contact forms:', error);
+            toast({
+                title: "Error",
+                description: "Failed to load contact forms",
                 variant: "destructive",
             });
         }
@@ -304,9 +328,10 @@ export default function AdminPage() {
       <h1 className="text-3xl font-bold font-headline mb-6">Admin Dashboard</h1>
 
       <Tabs defaultValue="applications" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 md:w-[600px]">
+        <TabsList className="grid w-full grid-cols-4 md:w-[800px]">
           <TabsTrigger value="applications">Manage Applications</TabsTrigger>
           <TabsTrigger value="content">Manage Library</TabsTrigger>
+          <TabsTrigger value="contacts">Contact Forms</TabsTrigger>
           <TabsTrigger value="add">
             {editingResource ? 'Edit Resource' : 'Add New Resource'}
           </TabsTrigger>
@@ -415,7 +440,12 @@ export default function AdminPage() {
                         <TableCell className="hidden md:table-cell">{resource.author}</TableCell>
                         <TableCell className="hidden md:table-cell">
                            <div className="flex gap-1">
-                            {resource.tags?.split(',').map((tag: string) => <Badge key={tag} variant="secondary" className="whitespace-nowrap">{tag.trim()}</Badge>)}
+                            {Array.isArray(resource.tags) 
+                              ? resource.tags.map((tag: string) => <Badge key={tag} variant="secondary" className="whitespace-nowrap">{tag}</Badge>)
+                              : typeof resource.tags === 'string' 
+                                ? resource.tags.split(',').map((tag: string) => <Badge key={tag} variant="secondary" className="whitespace-nowrap">{tag.trim()}</Badge>)
+                                : []
+                            }
                            </div>
                         </TableCell>
                         <TableCell className="hidden md:table-cell">{resource.date}</TableCell>
@@ -438,6 +468,79 @@ export default function AdminPage() {
                   </TableBody>
                 </Table>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="contacts" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Form Submissions</CardTitle>
+              <CardDescription>Review and respond to messages from users who filled out the contact form.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Subject</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Urgent</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {contactForms.map((contact) => (
+                      <TableRow key={contact.id}>
+                        <TableCell className="font-medium">{contact.name}</TableCell>
+                        <TableCell>{contact.email}</TableCell>
+                        <TableCell className="max-w-[200px] truncate">{contact.subject}</TableCell>
+                        <TableCell>
+                          <Badge variant={contact.type === 'THREAT_REPORT' ? 'destructive' : 'secondary'}>
+                            {contact.type?.replace('_', ' ') || 'GENERAL'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{new Date(contact.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          {contact.isUrgent && <Badge variant="destructive">Urgent</Badge>}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedContact(contact);
+                                setIsContactDialogOpen(true);
+                              }}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                // Open email client or copy email
+                                window.open(`mailto:${contact.email}?subject=Re: ${contact.subject}`);
+                              }}
+                            >
+                              Reply
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              {contactForms.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  No contact form submissions yet.
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -469,7 +572,7 @@ export default function AdminPage() {
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="tags">Tags (comma-separated)</Label>
-                        <Input id="tags" name="tags" placeholder="e.g., pentesting, red-team" defaultValue={editingResource?.tags} />
+                        <Input id="tags" name="tags" placeholder="e.g., pentesting, red-team" defaultValue={Array.isArray(editingResource?.tags) ? editingResource?.tags.join(', ') : editingResource?.tags} />
                     </div>
                  </div>
                  <div className="space-y-2">
@@ -497,6 +600,79 @@ export default function AdminPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Contact Form Details Dialog */}
+      <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Contact Form Details</DialogTitle>
+            <DialogDescription>
+              Message from {selectedContact?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium">Name</Label>
+                <p className="mt-1">{selectedContact?.name}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Email</Label>
+                <p className="mt-1">{selectedContact?.email}</p>
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm font-medium">Subject</Label>
+              <p className="mt-1">{selectedContact?.subject}</p>
+            </div>
+            <div>
+              <Label className="text-sm font-medium">Message</Label>
+              <div className="mt-1 p-3 bg-muted rounded-md">
+                <p className="whitespace-pre-wrap">{selectedContact?.message}</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label className="text-sm font-medium">Type</Label>
+                <p className="mt-1">{selectedContact?.type?.replace('_', ' ') || 'GENERAL'}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Priority</Label>
+                <p className="mt-1">{selectedContact?.isUrgent ? 'Urgent' : 'Normal'}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Date</Label>
+                <p className="mt-1">{selectedContact?.createdAt && new Date(selectedContact.createdAt).toLocaleDateString()}</p>
+              </div>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button
+                onClick={() => {
+                  if (selectedContact?.email) {
+                    window.open(`mailto:${selectedContact.email}?subject=Re: ${selectedContact.subject}`);
+                  }
+                }}
+              >
+                Reply via Email
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (selectedContact?.email) {
+                    navigator.clipboard.writeText(selectedContact.email);
+                    toast({
+                      title: "Copied!",
+                      description: "Email address copied to clipboard",
+                    });
+                  }
+                }}
+              >
+                Copy Email
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

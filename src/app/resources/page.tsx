@@ -8,12 +8,12 @@ import { useState, useEffect } from "react";
 interface Resource {
   id: string;
   title: string;
-  summary: string;
-  content: string;
-  author: string;
+  description?: string;
+  content?: string;
+  authorName: string;
   createdAt: string;
-  imageUrl?: string;
-  tags?: string;
+  fileUrl?: string;
+  tags?: string[] | string;
 }
 
 export default function ResourcesPage() {
@@ -25,11 +25,17 @@ export default function ResourcesPage() {
       try {
         const response = await fetch('/api/resources');
         if (response.ok) {
-          const data = await response.json();
-          setResources(data);
+          const result = await response.json();
+          if (result.success && Array.isArray(result.data)) {
+            setResources(result.data);
+          } else {
+            console.error('Invalid response format:', result);
+            setResources([]);
+          }
         }
       } catch (error) {
         console.error('Error fetching resources:', error);
+        setResources([]);
       } finally {
         setLoading(false);
       }
@@ -66,13 +72,17 @@ export default function ResourcesPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {resources.map((resource) => {
-          const tags = resource.tags ? resource.tags.split(',').map(tag => tag.trim()) : [];
+        {Array.isArray(resources) && resources.map((resource) => {
+          const tags = Array.isArray(resource.tags) 
+            ? resource.tags 
+            : typeof resource.tags === 'string' 
+              ? resource.tags.split(',').map(tag => tag.trim()) 
+              : [];
           return (
             <Card key={resource.id} className="flex flex-col overflow-hidden hover:shadow-lg transition-shadow duration-300 bg-card">
               <div className="relative h-48 w-full">
                 <Image 
-                  src={resource.imageUrl || "https://placehold.co/600x400.png"} 
+                  src={resource.fileUrl || "https://placehold.co/600x400.png"} 
                   alt={resource.title} 
                   fill 
                   style={{objectFit: "cover"}} 
@@ -87,17 +97,17 @@ export default function ResourcesPage() {
                 </div>
               </CardHeader>
               <CardContent className="flex-grow">
-                <CardDescription>{resource.summary}</CardDescription>
+                <CardDescription>{resource.description || 'No description available'}</CardDescription>
               </CardContent>
               <CardFooter className="text-sm text-muted-foreground">
-                <p>By {resource.author} on {formatDate(resource.createdAt)}</p>
+                <p>By {resource.authorName} on {formatDate(resource.createdAt)}</p>
               </CardFooter>
             </Card>
           );
         })}
       </div>
 
-      {resources.length === 0 && !loading && (
+      {(!Array.isArray(resources) || resources.length === 0) && !loading && (
         <div className="text-center py-12">
           <p className="text-muted-foreground">No resources available at the moment.</p>
         </div>

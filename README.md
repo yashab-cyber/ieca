@@ -420,6 +420,69 @@ Customize email templates in `scripts/main.js`:
 
 **🚀 Website successfully deployed and optimized for [ieca.zehrasec.com](https://ieca.zehrasec.com)**
 
+## 🚀 **Deployment Guide**
+
+### Quick Deployment Options
+
+#### 1. **Docker Production Deployment** (Recommended)
+```bash
+# Clone the repository
+git clone https://github.com/yashab-cyber/ieca.git
+cd ieca
+
+# Copy environment variables
+cp .env.example .env
+# Edit .env with your configuration
+
+# Deploy to production
+./deploy.sh prod
+```
+
+#### 2. **Development Deployment**
+```bash
+# Install dependencies
+npm install
+
+# Set up database
+npm run db:push
+npm run db:seed
+
+# Start development server
+./deploy.sh dev
+```
+
+#### 3. **Cloud Platform Deployment**
+
+##### Vercel (Recommended for quick deployment)
+1. Connect your GitHub repository to Vercel
+2. Configure environment variables in Vercel dashboard
+3. Set up external PostgreSQL database
+4. Deploy automatically
+
+##### Railway/Render
+1. Connect repository to Railway/Render
+2. Configure environment variables
+3. Set up PostgreSQL service
+4. Deploy application
+
+### Environment Variables Required
+```env
+GEMINI_API_KEY=your_gemini_api_key
+DATABASE_URL=postgresql://user:password@host:port/database
+JWT_SECRET=your-secure-jwt-secret
+NODE_ENV=production
+```
+
+### Prerequisites
+- Node.js 18+
+- PostgreSQL database
+- Docker (for containerized deployment)
+- SSL certificate (for production)
+
+For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md)
+
+---
+
 **💚 Proudly serving India's cybersecurity community with free, professional services**
 
 **Built with ❤️ for India's Digital Security by ZehraSec & Yashab Alam**

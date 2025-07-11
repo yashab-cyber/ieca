@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  # Next.js Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ieca_app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-ieca_user}:${POSTGRES_PASSWORD:-ieca_secure_password}@postgres:5432/${POSTGRES_DB:-ieca_db}?schema=public
+      - JWT_SECRET=${JWT_SECRET}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - ieca_network
+    volumes:
+      - ./uploads:/app/uploads
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: ieca_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ieca_db}
+      POSTGRES_USER: ${POSTGRES_USER:-ieca_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ieca_secure_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - ieca_network
+
+  # PostgreSQL Admin (optional, for database management)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: ieca_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@ieca.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - ieca_network
+    depends_on:
+      - postgres
+
+  # Nginx Reverse Proxy (optional, for SSL and load balancing)
+  nginx:
+    image: nginx:alpine
+    container_name: ieca_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    networks:
+      - ieca_network
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  ieca_network:
+    driver: bridge

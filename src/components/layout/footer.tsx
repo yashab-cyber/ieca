@@ -51,6 +51,8 @@ export function Footer() {
               <nav className="flex flex-col gap-2 text-muted-foreground">
                 <Link href="/privacy-policy" className="hover:text-primary transition-colors">Privacy Policy</Link>
                 <Link href="/terms-of-service" className="hover:text-primary transition-colors">Terms of Service</Link>
+                <Link href="/code-of-conduct" className="hover:text-primary transition-colors">Code of Conduct</Link>
+                <Link href="/ethics-policy" className="hover:text-primary transition-colors">Ethics Policy</Link>
               </nav>
             </div>
           </div>

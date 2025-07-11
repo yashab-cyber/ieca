@@ -390,64 +390,314 @@ export const activityService = {
 
 // Analytics and statistics
 export const analyticsService = {
-  // Get dashboard stats
+  // Get comprehensive dashboard stats
   async getDashboardStats() {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
     const [
       totalUsers,
       activeUsers,
+      newUsersThisMonth,
+      totalApplications,
       pendingApplications,
+      approvedApplications,
+      totalChatMessages,
+      // totalGlobalChatMessages, // Comment out for now
       totalResources,
-      unreadMessages,
+      totalBlogPosts,
       totalContacts,
+      unreadContacts,
+      recentActivities,
     ] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { isActive: true } }),
+      prisma.user.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
+      prisma.application.count(),
       prisma.application.count({ where: { status: 'PENDING' } }),
+      prisma.application.count({ where: { status: 'APPROVED' } }),
+      prisma.chatMessage.count(),
+      // prisma.globalChatMessage.count(), // Comment out for now
       prisma.resource.count({ where: { status: 'PUBLISHED' } }),
-      prisma.chatMessage.count({ where: { isRead: false, role: 'USER' } }),
+      prisma.blogPost.count({ where: { status: 'PUBLISHED' } }),
+      prisma.contactForm.count(),
       prisma.contactForm.count({ where: { status: 'UNREAD' } }),
+      prisma.activity.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
     ]);
+
+    const approvalRate = totalApplications > 0 ? (approvedApplications / totalApplications) * 100 : 0;
 
     return {
       totalUsers,
       activeUsers,
+      newUsersThisMonth,
+      totalApplications,
       pendingApplications,
+      approvedApplications,
+      approvalRate,
+      totalChatMessages: totalChatMessages + 0, // Use regular chat messages only for now
       totalResources,
-      unreadMessages,
+      totalBlogPosts,
       totalContacts,
+      unreadContacts,
+      recentActivities,
     };
   },
 
-  // Get application statistics
+  // Get application statistics with detailed breakdown
   async getApplicationStats() {
-    const statusCounts = await prisma.application.groupBy({
-      by: ['status'],
-      _count: true,
-    });
+    const [statusCounts, monthlyApplications, skillsData] = await Promise.all([
+      prisma.application.groupBy({
+        by: ['status'],
+        _count: true,
+      }),
+      this.getMonthlyApplications(),
+      this.getPopularSkills(),
+    ]);
 
-    return statusCounts.reduce((acc: Record<string, number>, curr: any) => {
+    const statusBreakdown = statusCounts.reduce((acc: Record<string, number>, curr: any) => {
       acc[curr.status] = curr._count;
       return acc;
     }, {} as Record<string, number>);
+
+    const total = Object.values(statusBreakdown).reduce((sum, count) => sum + count, 0);
+    const approvalRate = total > 0 ? ((statusBreakdown.APPROVED || 0) / total) * 100 : 0;
+
+    return {
+      statusBreakdown,
+      approvalRate,
+      monthlyApplications,
+      popularSkills: skillsData,
+      total,
+    };
   },
 
-  // Get user growth over time
+  // Get monthly application trends
+  async getMonthlyApplications() {
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const applications = await prisma.application.findMany({
+      where: { createdAt: { gte: sixMonthsAgo } },
+      select: { createdAt: true, status: true },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const monthlyData: Record<string, { total: number; approved: number; pending: number; rejected: number }> = {};
+
+    applications.forEach(app => {
+      const monthKey = app.createdAt.toISOString().slice(0, 7); // YYYY-MM format
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = { total: 0, approved: 0, pending: 0, rejected: 0 };
+      }
+      monthlyData[monthKey].total++;
+      if (app.status === 'APPROVED') monthlyData[monthKey].approved++;
+      else if (app.status === 'PENDING') monthlyData[monthKey].pending++;
+      else if (app.status === 'REJECTED') monthlyData[monthKey].rejected++;
+    });
+
+    return Object.entries(monthlyData).map(([month, data]) => ({
+      month,
+      ...data,
+    }));
+  },
+
+  // Get popular skills from applications
+  async getPopularSkills() {
+    const applications = await prisma.application.findMany({
+      select: { skills: true },
+    });
+
+    const skillCounts: Record<string, number> = {};
+    applications.forEach(app => {
+      app.skills.forEach(skill => {
+        skillCounts[skill] = (skillCounts[skill] || 0) + 1;
+      });
+    });
+
+    return Object.entries(skillCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 10)
+      .map(([skill, count]) => ({ skill, count }));
+  },
+
+  // Get user growth over time with detailed breakdown
   async getUserGrowth(days = 30) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    return prisma.user.groupBy({
-      by: ['createdAt'],
-      where: {
-        createdAt: {
-          gte: startDate,
-        },
-      },
-      _count: true,
-      orderBy: {
-        createdAt: 'asc',
-      },
+    const users = await prisma.user.findMany({
+      where: { createdAt: { gte: startDate } },
+      select: { createdAt: true, role: true },
+      orderBy: { createdAt: 'asc' },
     });
+
+    const dailyData: Record<string, { date: string; total: number; members: number; admins: number }> = {};
+
+    users.forEach(user => {
+      const dateKey = user.createdAt.toISOString().slice(0, 10); // YYYY-MM-DD format
+      if (!dailyData[dateKey]) {
+        dailyData[dateKey] = { date: dateKey, total: 0, members: 0, admins: 0 };
+      }
+      dailyData[dateKey].total++;
+      if (user.role === 'MEMBER') dailyData[dateKey].members++;
+      else if (user.role === 'ADMIN') dailyData[dateKey].admins++;
+    });
+
+    return Object.values(dailyData);
+  },
+
+  // Get chat analytics
+  async getChatAnalytics() {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    // Use regular chat messages for now
+    const [
+      totalMessages,
+      messagesThisWeek,
+      topUsers,
+    ] = await Promise.all([
+      prisma.chatMessage.count(),
+      prisma.chatMessage.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
+      this.getTopChatUsers(),
+    ]);
+
+    const messagesByType = await this.getMessagesByType();
+    const attachmentStats = await this.getAttachmentStats();
+
+    return {
+      totalMessages,
+      messagesThisWeek,
+      activeRooms: 1, // Placeholder
+      topUsers,
+      messagesByType,
+      attachmentStats,
+    };
+  },
+
+  // Get top chat users by message count
+  async getTopChatUsers() {
+    const topUsers = await prisma.chatMessage.groupBy({
+      by: ['userId'],
+      _count: { id: true },
+      orderBy: { _count: { id: 'desc' } },
+      take: 10,
+      where: { userId: { not: null } },
+    });
+
+    const userIds = topUsers.map((u: any) => u.userId).filter(Boolean);
+    
+    const userDetails = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, name: true, email: true },
+    });
+
+    return topUsers.map((user: any) => {
+      const details = userDetails.find(u => u.id === user.userId);
+      return {
+        userId: user.userId,
+        name: details?.name || 'Unknown',
+        messageCount: user._count.id,
+      };
+    });
+  },
+
+  // Get messages by type breakdown
+  async getMessagesByType() {
+    // Use regular chat messages for now
+    const total = await prisma.chatMessage.count();
+    return [
+      { messageType: 'TEXT', _count: { id: total } },
+    ];
+  },
+
+  // Get attachment statistics
+  async getAttachmentStats() {
+    // Placeholder for now
+    return {
+      totalAttachments: 0,
+      fileTypes: [],
+      totalSizeBytes: 0,
+    };
+  },
+
+  // Get security analytics
+  async getSecurityAnalytics() {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const [
+      failedLogins,
+      recentActivities,
+      suspiciousActivities,
+      threatReports,
+    ] = await Promise.all([
+      prisma.activity.count({
+        where: {
+          action: 'LOGIN',
+          createdAt: { gte: sevenDaysAgo },
+          description: { contains: 'failed' },
+        },
+      }),
+      prisma.activity.findMany({
+        where: { createdAt: { gte: sevenDaysAgo } },
+        include: { user: { select: { name: true, email: true } } },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      }),
+      prisma.activity.count({
+        where: {
+          createdAt: { gte: sevenDaysAgo },
+          description: { contains: 'suspicious' },
+        },
+      }),
+      prisma.contactForm.count({
+        where: { type: 'THREAT_REPORT' },
+      }),
+    ]);
+
+    return {
+      failedLogins,
+      recentActivities,
+      suspiciousActivities,
+      threatReports,
+    };
+  },
+
+  // Get resource analytics
+  async getResourceAnalytics() {
+    const [
+      totalDownloads,
+      popularResources,
+      resourcesByCategory,
+      averageRating,
+    ] = await Promise.all([
+      prisma.resource.aggregate({ _sum: { downloads: true } }),
+      prisma.resource.findMany({
+        where: { status: 'PUBLISHED' },
+        orderBy: { downloads: 'desc' },
+        take: 10,
+        select: { title: true, downloads: true, views: true, rating: true },
+      }),
+      prisma.resource.groupBy({
+        by: ['category'],
+        _count: { id: true },
+        where: { status: 'PUBLISHED' },
+      }),
+      prisma.resource.aggregate({
+        _avg: { rating: true },
+        where: { status: 'PUBLISHED' },
+      }),
+    ]);
+
+    return {
+      totalDownloads: totalDownloads._sum.downloads || 0,
+      popularResources,
+      resourcesByCategory,
+      averageRating: averageRating._avg.rating || 0,
+    };
   },
 };
 
@@ -678,4 +928,317 @@ export const eventService = {
       },
     });
   },
+};
+
+// Full Global Chat Service
+export const globalChatService = {
+  // Get or create the default global chat room
+  async getGlobalRoom() {
+    let room = await prisma.globalChatRoom.findFirst({
+      where: { name: 'General' },
+      include: {
+        creator: {
+          select: { id: true, name: true, email: true }
+        },
+        _count: {
+          select: { members: true, messages: true }
+        }
+      }
+    });
+
+    if (!room) {
+      // Create default room if it doesn't exist
+      const adminUser = await prisma.user.findFirst({
+        where: { role: 'ADMIN' }
+      });
+
+      if (adminUser) {
+        room = await prisma.globalChatRoom.create({
+          data: {
+            name: 'General',
+            description: 'Global chat room for all IECA members',
+            createdBy: adminUser.id,
+          },
+          include: {
+            creator: {
+              select: { id: true, name: true, email: true }
+            },
+            _count: {
+              select: { members: true, messages: true }
+            }
+          }
+        });
+      }
+    }
+
+    return room;
+  },
+
+  // Join user to global chat room
+  async joinRoom(roomId: string, userId: string) {
+    return prisma.globalChatMember.upsert({
+      where: {
+        roomId_userId: {
+          roomId,
+          userId
+        }
+      },
+      update: {
+        lastSeenAt: new Date(),
+      },
+      create: {
+        roomId,
+        userId,
+        role: 'MEMBER',
+      },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true }
+        }
+      }
+    });
+  },
+
+  // Send a message
+  async sendMessage(data: {
+    roomId: string;
+    userId: string;
+    content?: string;
+    messageType?: 'TEXT' | 'FILE' | 'IMAGE' | 'CODE' | 'DOCUMENT';
+    replyToId?: string;
+  }) {
+    return prisma.globalChatMessage.create({
+      data: {
+        roomId: data.roomId,
+        userId: data.userId,
+        content: data.content,
+        messageType: data.messageType || 'TEXT',
+        replyToId: data.replyToId,
+      },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true, profile: { select: { avatar: true } } }
+        },
+        replyTo: {
+          select: {
+            id: true,
+            content: true,
+            user: { select: { name: true } }
+          }
+        },
+        attachments: true,
+        reactions: {
+          include: {
+            user: { select: { name: true } }
+          }
+        },
+        _count: {
+          select: { reactions: true, replies: true }
+        }
+      }
+    });
+  },
+
+  // Get messages for a room
+  async getMessages(roomId: string, limit: number = 50, offset: number = 0) {
+    return prisma.globalChatMessage.findMany({
+      where: { roomId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      skip: offset,
+      include: {
+        user: {
+          select: { id: true, name: true, email: true, profile: { select: { avatar: true } } }
+        },
+        replyTo: {
+          select: {
+            id: true,
+            content: true,
+            user: { select: { name: true } }
+          }
+        },
+        attachments: true,
+        reactions: {
+          include: {
+            user: { select: { name: true } }
+          }
+        },
+        _count: {
+          select: { reactions: true, replies: true }
+        }
+      }
+    });
+  },
+
+  // Add attachment to message
+  async addAttachment(data: {
+    messageId: string;
+    fileName: string;
+    originalName: string;
+    mimeType: string;
+    fileSize: number;
+    downloadUrl: string;
+  }) {
+    return prisma.globalChatAttachment.create({
+      data
+    });
+  },
+
+  // Add reaction to message
+  async addReaction(messageId: string, userId: string, emoji: string) {
+    return prisma.globalChatReaction.upsert({
+      where: {
+        messageId_userId_emoji: {
+          messageId,
+          userId,
+          emoji
+        }
+      },
+      update: {},
+      create: {
+        messageId,
+        userId,
+        emoji
+      }
+    });
+  },
+
+  // Remove reaction from message
+  async removeReaction(messageId: string, userId: string, emoji: string) {
+    return prisma.globalChatReaction.delete({
+      where: {
+        messageId_userId_emoji: {
+          messageId,
+          userId,
+          emoji
+        }
+      }
+    });
+  },
+
+  // Get online members
+  async getOnlineMembers(roomId: string) {
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    
+    return prisma.globalChatMember.findMany({
+      where: {
+        roomId,
+        lastSeenAt: {
+          gte: fiveMinutesAgo
+        }
+      },
+      include: {
+        user: {
+          select: { id: true, name: true, profile: { select: { avatar: true } } }
+        }
+      }
+    });
+  },
+
+  // Update last seen
+  async updateLastSeen(roomId: string, userId: string) {
+    return prisma.globalChatMember.update({
+      where: {
+        roomId_userId: {
+          roomId,
+          userId
+        }
+      },
+      data: {
+        lastSeenAt: new Date()
+      }
+    });
+  },
+
+  // Get a single message by ID
+  async getMessage(messageId: string) {
+    return prisma.globalChatMessage.findUnique({
+      where: { id: messageId },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true, profile: true }
+        },
+        room: {
+          select: { id: true, name: true }
+        },
+        replyTo: {
+          select: {
+            id: true,
+            content: true,
+            user: { select: { name: true } }
+          }
+        },
+        attachments: true,
+        reactions: {
+          include: {
+            user: { select: { name: true } }
+          }
+        },
+        _count: {
+          select: { reactions: true, replies: true }
+        }
+      }
+    });
+  },
+
+  // Update a message
+  async updateMessage(messageId: string, data: { content?: string; isEdited?: boolean }) {
+    return prisma.globalChatMessage.update({
+      where: { id: messageId },
+      data: {
+        ...data,
+        updatedAt: new Date()
+      },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true, profile: true }
+        },
+        room: {
+          select: { id: true, name: true }
+        },
+        replyTo: {
+          select: {
+            id: true,
+            content: true,
+            user: { select: { name: true } }
+          }
+        },
+        attachments: true,
+        reactions: {
+          include: {
+            user: { select: { name: true } }
+          }
+        },
+        _count: {
+          select: { reactions: true, replies: true }
+        }
+      }
+    });
+  },
+
+  // Delete a message and its related data
+  async deleteMessage(messageId: string) {
+    // Delete in the correct order due to foreign key constraints
+    await prisma.$transaction(async (tx) => {
+      // Delete reactions first
+      await tx.globalChatReaction.deleteMany({
+        where: { messageId }
+      });
+
+      // Delete attachments
+      await tx.globalChatAttachment.deleteMany({
+        where: { messageId }
+      });
+
+      // Delete replies to this message
+      await tx.globalChatMessage.deleteMany({
+        where: { replyToId: messageId }
+      });
+
+      // Finally delete the message itself
+      await tx.globalChatMessage.delete({
+        where: { id: messageId }
+      });
+    });
+  }
 };
