@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to IECA</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .logo {
+            max-width: 120px;
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .welcome-message {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+        .features {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .features h3 {
+            color: #0f172a;
+            margin-top: 0;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #22c55e;
+            font-weight: bold;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .footer {
+            background: #f1f5f9;
+            padding: 20px 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #64748b;
+        }
+        .social-links {
+            margin-top: 15px;
+        }
+        .social-links a {
+            color: #3b82f6;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="cid:ieca-logo" alt="IECA Logo" class="logo">
+            <h1>🇮🇳 Welcome to IECA</h1>
+            <p>Indian Error Cyber Army - India's Premier Cybersecurity Community</p>
+        </div>
+        
+        <div class="content">
+            <p class="welcome-message">
+                Dear <strong>{{name}}</strong>,
+            </p>
+            
+            <p>
+                Welcome to the <strong>Indian Error Cyber Army</strong>! We're thrilled to have you join India's most elite cybersecurity community. Your journey towards becoming a cybersecurity expert starts here.
+            </p>
+            
+            <div class="features">
+                <h3>🚀 What's Available for You:</h3>
+                <ul class="feature-list">
+                    <li>Access to exclusive cybersecurity resources and tools</li>
+                    <li>Real-time global chat with security professionals</li>
+                    <li>Advanced training materials and tutorials</li>
+                    <li>Participation in CTF challenges and competitions</li>
+                    <li>Networking with India's top ethical hackers</li>
+                    <li>Regular security updates and threat intelligence</li>
+                    <li>Career guidance and mentorship opportunities</li>
+                </ul>
+            </div>
+            
+            <p>
+                As a member of IECA, you're now part of a community dedicated to strengthening India's digital security infrastructure. Together, we work to protect our nation's digital assets and educate the next generation of cybersecurity professionals.
+            </p>
+            
+            <div style="text-align: center;">
+                <a href="{{websiteUrl}}/portal/dashboard" class="cta-button">
+                    Access Your Portal 🚀
+                </a>
+            </div>
+            
+            <p style="margin-top: 30px;">
+                <strong>Important:</strong> Please keep your login credentials secure and follow our Code of Conduct. If you have any questions, our community is here to help.
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>
+                <strong>Indian Error Cyber Army (IECA)</strong><br>
+                Building India's Cybersecurity Future
+            </p>
+            <div class="social-links">
+                <a href="{{websiteUrl}}">Visit Website</a> |
+                <a href="{{websiteUrl}}/contact">Contact Support</a> |
+                <a href="{{websiteUrl}}/code-of-conduct">Code of Conduct</a>
+            </div>
+            <p style="margin-top: 15px; font-size: 12px;">
+                This email was sent to you because you registered for IECA membership.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

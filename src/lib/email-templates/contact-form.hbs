@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Form Submission - IECA</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .logo {
+            max-width: 120px;
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .form-details {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .field {
+            margin: 15px 0;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .field:last-child {
+            border-bottom: none;
+        }
+        .label {
+            font-weight: bold;
+            color: #374151;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .value {
+            color: #111827;
+        }
+        .message-box {
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .footer {
+            background: #f1f5f9;
+            padding: 20px 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="cid:ieca-logo" alt="IECA Logo" class="logo">
+            <h1>📞 New Contact Form Submission</h1>
+            <p>IECA Website Contact Form</p>
+        </div>
+        
+        <div class="content">
+            <p>A new contact form has been submitted through the IECA website.</p>
+            
+            <div class="form-details">
+                <h3>📋 Submission Details:</h3>
+                
+                <div class="field">
+                    <span class="label">Name:</span>
+                    <span class="value">{{name}}</span>
+                </div>
+                
+                <div class="field">
+                    <span class="label">Email:</span>
+                    <span class="value">{{email}}</span>
+                </div>
+                
+                <div class="field">
+                    <span class="label">Subject:</span>
+                    <span class="value">{{subject}}</span>
+                </div>
+                
+                <div class="field">
+                    <span class="label">Message:</span>
+                    <div class="message-box">{{message}}</div>
+                </div>
+                
+                <div class="field">
+                    <span class="label">Submitted:</span>
+                    <span class="value">{{timestamp}}</span>
+                </div>
+            </div>
+            
+            <p>
+                <strong>Action Required:</strong> Please respond to this inquiry within 24 hours to maintain our professional service standards.
+            </p>
+            
+            <p>
+                <strong>Response Instructions:</strong><br>
+                Reply directly to: <a href="mailto:{{email}}">{{email}}</a><br>
+                Include the contact form reference in your response.
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>
+                <strong>Indian Error Cyber Army (IECA)</strong><br>
+                Contact Form Notification System
+            </p>
+            <p style="margin-top: 15px; font-size: 12px;">
+                This is an automated notification. Submitted at {{timestamp}}.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

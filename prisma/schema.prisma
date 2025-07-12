@@ -1,6 +1,3 @@
-// This is your Prisma schema file for IECA (Indian Error Cyber Army)
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,70 +7,63 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User model for authentication and member management
 model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  password    String   // Hashed password
-  name        String
-  phone       String?
-  linkedin    String?
-  github      String?
-  role        UserRole @default(MEMBER)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  lastLoginAt DateTime?
-
-  // Relations
-  profile           UserProfile?
-  applications      Application[]
-  chatMessages      ChatMessage[]
-  blogPosts         BlogPost[]
-  comments          Comment[]
-  activities        Activity[]
-  
-  // Global Chat Relations
-  createdRooms      GlobalChatRoom[]      @relation("CreatedRooms")
-  sentMessages      GlobalChatMessage[]   @relation("SentMessages")
-  chatMemberships   GlobalChatMember[]    @relation("ChatMemberships")
-  messageReactions  GlobalChatReaction[]  @relation("MessageReactions")
+  id               String               @id @default(cuid())
+  email            String               @unique
+  password         String
+  name             String
+  phone            String?
+  linkedin         String?
+  github           String?
+  role             UserRole             @default(MEMBER)
+  isActive         Boolean              @default(true)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  lastLoginAt      DateTime?
+  activities       Activity[]
+  applications     Application[]
+  blogPosts        BlogPost[]
+  chatMessages     ChatMessage[]
+  comments         Comment[]
+  emailConfigs     EmailConfig[]
+  createdTemplates EmailTemplate[]
+  chatMemberships  GlobalChatMember[]   @relation("ChatMemberships")
+  sentMessages     GlobalChatMessage[]  @relation("SentMessages")
+  messageReactions GlobalChatReaction[] @relation("MessageReactions")
+  createdRooms     GlobalChatRoom[]     @relation("CreatedRooms")
+  profile          UserProfile?
 
   @@map("users")
 }
 
-// User profile with additional information
 model UserProfile {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  bio          String?
-  avatar       String?
-  skills       String[] // JSON array of skills
-  experience   String?
-  location     String?
-  website      String?
-  isPublic     Boolean  @default(false)
-  joinedAt     DateTime @default(now())
-  reputation   Int      @default(0)
-  points       Int      @default(0)
-  rank         String   @default("Rookie")
-  
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  bio        String?
+  avatar     String?
+  skills     String[]
+  experience String?
+  location   String?
+  website    String?
+  isPublic   Boolean  @default(false)
+  joinedAt   DateTime @default(now())
+  reputation Int      @default(0)
+  points     Int      @default(0)
+  rank       String   @default("Rookie")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_profiles")
 }
 
-// Application model for join requests
 model Application {
   id              String            @id @default(cuid())
-  userId          String?           // Optional - for logged in users
+  userId          String?
   name            String
   email           String
   phone           String
   linkedin        String?
   github          String?
-  skills          String[]          // JSON array of selected skills
+  skills          String[]
   statement       String
   isIndianCitizen Boolean
   status          ApplicationStatus @default(PENDING)
@@ -82,31 +72,25 @@ model Application {
   reviewNotes     String?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
-
-  // Relations
-  user User? @relation(fields: [userId], references: [id])
+  user            User?             @relation(fields: [userId], references: [id])
 
   @@map("applications")
 }
 
-// Chat messages for the live chat system
 model ChatMessage {
   id        String      @id @default(cuid())
-  userId    String?     // Optional - for anonymous users
+  userId    String?
   message   String
   response  String?
   role      MessageRole @default(USER)
   isRead    Boolean     @default(false)
-  metadata  Json?       // Additional data like IP, user agent, etc.
+  metadata  Json?
   createdAt DateTime    @default(now())
-
-  // Relations
-  user User? @relation(fields: [userId], references: [id])
+  user      User?       @relation(fields: [userId], references: [id])
 
   @@map("chat_messages")
 }
 
-// Blog posts for news and announcements
 model BlogPost {
   id          String     @id @default(cuid())
   title       String
@@ -121,34 +105,28 @@ model BlogPost {
   publishedAt DateTime?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-
-  // Relations
-  author   User      @relation(fields: [authorId], references: [id])
-  comments Comment[]
+  author      User       @relation(fields: [authorId], references: [id])
+  comments    Comment[]
 
   @@map("blog_posts")
 }
 
-// Comments for blog posts
 model Comment {
-  id        String   @id @default(cuid())
-  postId    String
-  userId    String
-  content   String
-  isApproved Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  post BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user User     @relation(fields: [userId], references: [id])
+  id         String   @id @default(cuid())
+  postId     String
+  userId     String
+  content    String
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  post       BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id])
 
   @@map("comments")
 }
 
-// Resources for cybersecurity materials
 model Resource {
-  id          String       @id @default(cuid())
+  id          String     @id @default(cuid())
   title       String
   description String?
   content     String?
@@ -156,18 +134,17 @@ model Resource {
   category    String
   tags        String[]
   authorName  String
-  difficulty  Difficulty   @default(BEGINNER)
-  status      PostStatus   @default(DRAFT)
-  downloads   Int          @default(0)
-  views       Int          @default(0)
-  rating      Float        @default(0)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  difficulty  Difficulty @default(BEGINNER)
+  status      PostStatus @default(DRAFT)
+  downloads   Int        @default(0)
+  views       Int        @default(0)
+  rating      Float      @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   @@map("resources")
 }
 
-// Activity logs for tracking user actions
 model Activity {
   id          String       @id @default(cuid())
   userId      String
@@ -177,14 +154,11 @@ model Activity {
   ipAddress   String?
   userAgent   String?
   createdAt   DateTime     @default(now())
-
-  // Relations
-  user User @relation(fields: [userId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
 
   @@map("activities")
 }
 
-// Contact form submissions
 model ContactForm {
   id        String      @id @default(cuid())
   name      String
@@ -199,7 +173,6 @@ model ContactForm {
   @@map("contact_forms")
 }
 
-// System notifications
 model Notification {
   id        String           @id @default(cuid())
   title     String
@@ -213,7 +186,186 @@ model Notification {
   @@map("notifications")
 }
 
-// Enums
+model GlobalChatRoom {
+  id          String              @id @default(cuid())
+  name        String
+  description String?
+  isPrivate   Boolean             @default(false)
+  createdBy   String
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  members     GlobalChatMember[]
+  messages    GlobalChatMessage[]
+  creator     User                @relation("CreatedRooms", fields: [createdBy], references: [id])
+
+  @@map("global_chat_rooms")
+}
+
+model GlobalChatMessage {
+  id          String                 @id @default(cuid())
+  roomId      String
+  userId      String
+  content     String?
+  messageType GlobalMessageType      @default(TEXT)
+  isEdited    Boolean                @default(false)
+  replyToId   String?
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  attachments GlobalChatAttachment[]
+  replyTo     GlobalChatMessage?     @relation("MessageReplies", fields: [replyToId], references: [id])
+  replies     GlobalChatMessage[]    @relation("MessageReplies")
+  room        GlobalChatRoom         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user        User                   @relation("SentMessages", fields: [userId], references: [id])
+  reactions   GlobalChatReaction[]
+
+  @@map("global_chat_messages")
+}
+
+model GlobalChatAttachment {
+  id           String            @id @default(cuid())
+  messageId    String
+  fileName     String
+  originalName String
+  mimeType     String
+  fileSize     Int
+  downloadUrl  String
+  uploadedAt   DateTime          @default(now())
+  message      GlobalChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@map("global_chat_attachments")
+}
+
+model GlobalChatMember {
+  id         String         @id @default(cuid())
+  roomId     String
+  userId     String
+  role       ChatMemberRole @default(MEMBER)
+  joinedAt   DateTime       @default(now())
+  lastSeenAt DateTime?
+  room       GlobalChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user       User           @relation("ChatMemberships", fields: [userId], references: [id])
+
+  @@unique([roomId, userId])
+  @@map("global_chat_members")
+}
+
+model GlobalChatReaction {
+  id        String            @id @default(cuid())
+  messageId String
+  userId    String
+  emoji     String
+  createdAt DateTime          @default(now())
+  message   GlobalChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User              @relation("MessageReactions", fields: [userId], references: [id])
+
+  @@unique([messageId, userId, emoji])
+  @@map("global_chat_reactions")
+}
+
+model EmailTemplate {
+  id          String                  @id @default(cuid())
+  name        String
+  type        EmailTemplateType
+  subject     String
+  htmlContent String
+  textContent String?
+  description String?
+  isActive    Boolean                 @default(true)
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  createdBy   String?
+  emailLogs   EmailLog[]
+  variables   EmailTemplateVariable[]
+  creator     User?                   @relation(fields: [createdBy], references: [id])
+
+  @@map("email_templates")
+}
+
+model EmailTemplateVariable {
+  id           String        @id @default(cuid())
+  templateId   String
+  name         String
+  description  String?
+  required     Boolean       @default(false)
+  defaultValue String?
+  template     EmailTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, name])
+  @@map("email_template_variables")
+}
+
+model EmailLog {
+  id           String         @id @default(cuid())
+  templateId   String?
+  recipient    String
+  subject      String
+  status       EmailStatus    @default(PENDING)
+  messageId    String?
+  errorMessage String?
+  attempts     Int            @default(0)
+  scheduledAt  DateTime?
+  sentAt       DateTime?
+  deliveredAt  DateTime?
+  openedAt     DateTime?
+  clickedAt    DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  metadata     Json?
+  template     EmailTemplate? @relation(fields: [templateId], references: [id])
+
+  @@index([recipient])
+  @@index([status])
+  @@index([createdAt])
+  @@map("email_logs")
+}
+
+model EmailQueue {
+  id           String      @id @default(cuid())
+  recipient    String
+  subject      String
+  htmlContent  String
+  textContent  String?
+  priority     Int         @default(5)
+  scheduledAt  DateTime?
+  attempts     Int         @default(0)
+  maxAttempts  Int         @default(3)
+  status       QueueStatus @default(PENDING)
+  errorMessage String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  metadata     Json?
+
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([priority])
+  @@map("email_queue")
+}
+
+model EmailConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  encrypted Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+  updater   User?    @relation(fields: [updatedBy], references: [id])
+
+  @@map("email_config")
+}
+
+model EmailStats {
+  id             String   @id @default(cuid())
+  date           DateTime @unique @db.Date
+  totalSent      Int      @default(0)
+  totalDelivered Int      @default(0)
+  totalOpened    Int      @default(0)
+  totalClicked   Int      @default(0)
+  totalFailed    Int      @default(0)
+  totalBounced   Int      @default(0)
+
+  @@map("email_stats")
+}
+
 enum UserRole {
   ADMIN
   MODERATOR
@@ -282,93 +434,6 @@ enum NotificationType {
   SECURITY_ALERT
 }
 
-// Global Chat System Models
-model GlobalChatRoom {
-  id          String            @id @default(cuid())
-  name        String
-  description String?
-  isPrivate   Boolean           @default(false)
-  createdBy   String
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  
-  // Relations
-  creator     User              @relation("CreatedRooms", fields: [createdBy], references: [id])
-  messages    GlobalChatMessage[]
-  members     GlobalChatMember[]
-  
-  @@map("global_chat_rooms")
-}
-
-model GlobalChatMessage {
-  id          String              @id @default(cuid())
-  roomId      String
-  userId      String
-  content     String?
-  messageType GlobalMessageType   @default(TEXT)
-  isEdited    Boolean             @default(false)
-  replyToId   String?
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
-  
-  // Relations
-  room        GlobalChatRoom      @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  user        User                @relation("SentMessages", fields: [userId], references: [id])
-  replyTo     GlobalChatMessage?  @relation("MessageReplies", fields: [replyToId], references: [id])
-  replies     GlobalChatMessage[] @relation("MessageReplies")
-  attachments GlobalChatAttachment[]
-  reactions   GlobalChatReaction[]
-  
-  @@map("global_chat_messages")
-}
-
-model GlobalChatAttachment {
-  id          String            @id @default(cuid())
-  messageId   String
-  fileName    String
-  originalName String
-  mimeType    String
-  fileSize    Int
-  downloadUrl String
-  uploadedAt  DateTime          @default(now())
-  
-  // Relations
-  message     GlobalChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  
-  @@map("global_chat_attachments")
-}
-
-model GlobalChatMember {
-  id          String         @id @default(cuid())
-  roomId      String
-  userId      String
-  role        ChatMemberRole @default(MEMBER)
-  joinedAt    DateTime       @default(now())
-  lastSeenAt  DateTime?
-  
-  // Relations
-  room        GlobalChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  user        User           @relation("ChatMemberships", fields: [userId], references: [id])
-  
-  @@unique([roomId, userId])
-  @@map("global_chat_members")
-}
-
-model GlobalChatReaction {
-  id        String            @id @default(cuid())
-  messageId String
-  userId    String
-  emoji     String
-  createdAt DateTime          @default(now())
-  
-  // Relations
-  message   GlobalChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  user      User              @relation("MessageReactions", fields: [userId], references: [id])
-  
-  @@unique([messageId, userId, emoji])
-  @@map("global_chat_reactions")
-}
-
 enum GlobalMessageType {
   TEXT
   FILE
@@ -381,4 +446,36 @@ enum ChatMemberRole {
   ADMIN
   MODERATOR
   MEMBER
+}
+
+enum EmailTemplateType {
+  WELCOME
+  APPLICATION_CONFIRMATION
+  APPLICATION_STATUS
+  PASSWORD_RESET
+  NOTIFICATION
+  MARKETING
+  TRANSACTIONAL
+  SYSTEM
+  CUSTOM
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  FAILED
+  BOUNCED
+  SPAM
+  UNSUBSCRIBED
+}
+
+enum QueueStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+  CANCELLED
 }

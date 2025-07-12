@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/database';
+import { emailService } from '@/lib/email';
 import { Prisma } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
@@ -15,7 +16,7 @@ export const userService = {
   }) {
     const hashedPassword = await bcrypt.hash(data.password, 12);
     
-    return prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         ...data,
         password: hashedPassword,
@@ -29,6 +30,16 @@ export const userService = {
         profile: true,
       },
     });
+
+    // Send welcome email
+    try {
+      await emailService.sendWelcomeEmail(user.email, user.name);
+    } catch (error) {
+      console.error('Failed to send welcome email:', error);
+      // Don't fail user creation if email fails
+    }
+
+    return user;
   },
 
   // Authenticate user
@@ -122,12 +133,26 @@ export const applicationService = {
     isIndianCitizen: boolean;
     userId?: string;
   }) {
-    return prisma.application.create({
+    const application = await prisma.application.create({
       data: {
         ...data,
         status: 'PENDING',
       },
     });
+
+    // Send application confirmation email
+    try {
+      await emailService.sendApplicationConfirmation(
+        application.email, 
+        application.name, 
+        application.id
+      );
+    } catch (error) {
+      console.error('Failed to send application confirmation email:', error);
+      // Don't fail application submission if email fails
+    }
+
+    return application;
   },
 
   // Get all applications (admin)
@@ -152,7 +177,7 @@ export const applicationService = {
     reviewedBy: string,
     reviewNotes?: string
   ) {
-    return prisma.application.update({
+    const application = await prisma.application.update({
       where: { id },
       data: {
         status,
@@ -161,6 +186,23 @@ export const applicationService = {
         reviewedAt: new Date(),
       },
     });
+
+    // Send status update email for approved/rejected applications
+    if (status === 'APPROVED' || status === 'REJECTED') {
+      try {
+        await emailService.sendApplicationStatusUpdate(
+          application.email,
+          application.name,
+          status.toLowerCase() as 'approved' | 'rejected',
+          reviewNotes
+        );
+      } catch (error) {
+        console.error('Failed to send application status email:', error);
+        // Don't fail status update if email fails
+      }
+    }
+
+    return application;
   },
 
   // Get application by ID
@@ -231,13 +273,28 @@ export const contactService = {
     type?: 'GENERAL' | 'THREAT_REPORT' | 'SUPPORT' | 'PARTNERSHIP' | 'MEDIA';
     isUrgent?: boolean;
   }) {
-    return prisma.contactForm.create({
+    const contactForm = await prisma.contactForm.create({
       data: {
         ...data,
         type: data.type || 'GENERAL',
         isUrgent: data.isUrgent || false,
       },
     });
+
+    // Send contact form notification to admins
+    try {
+      await emailService.sendContactFormNotification(
+        contactForm.name,
+        contactForm.email,
+        contactForm.subject,
+        contactForm.message
+      );
+    } catch (error) {
+      console.error('Failed to send contact form notification:', error);
+      // Don't fail contact form submission if email fails
+    }
+
+    return contactForm;
   },
 
   // Get all contact forms (admin)

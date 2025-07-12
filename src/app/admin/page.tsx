@@ -328,10 +328,11 @@ export default function AdminPage() {
       <h1 className="text-3xl font-bold font-headline mb-6">Admin Dashboard</h1>
 
       <Tabs defaultValue="applications" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 md:w-[800px]">
+        <TabsList className="grid w-full grid-cols-5 md:w-[1000px]">
           <TabsTrigger value="applications">Manage Applications</TabsTrigger>
           <TabsTrigger value="content">Manage Library</TabsTrigger>
           <TabsTrigger value="contacts">Contact Forms</TabsTrigger>
+          <TabsTrigger value="email">Email System</TabsTrigger>
           <TabsTrigger value="add">
             {editingResource ? 'Edit Resource' : 'Add New Resource'}
           </TabsTrigger>
@@ -541,6 +542,67 @@ export default function AdminPage() {
                   No contact form submissions yet.
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="email" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>📧 Email System Management</CardTitle>
+              <CardDescription>
+                Configure and test the IECA email system for user communications.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="font-semibold mb-2">Email Configuration Status</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Configure SMTP settings in your environment variables to enable email functionality.
+                  </p>
+                  <div className="space-y-2 text-sm">
+                    <div>• SMTP_HOST: Your email provider's SMTP server</div>
+                    <div>• SMTP_PORT: Usually 587 for TLS or 465 for SSL</div>
+                    <div>• SMTP_USER: Your email username</div>
+                    <div>• SMTP_PASSWORD: Your email password or app password</div>
+                    <div>• EMAIL_FROM: Default sender email address</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold mb-2">✅ Automated Emails</h4>
+                    <ul className="text-sm space-y-1">
+                      <li>• Welcome emails for new members</li>
+                      <li>• Application confirmations</li>
+                      <li>• Status update notifications</li>
+                      <li>• Password reset emails</li>
+                      <li>• Contact form notifications</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold mb-2">🎨 Email Templates</h4>
+                    <ul className="text-sm space-y-1">
+                      <li>• Professional IECA branding</li>
+                      <li>• Mobile-responsive design</li>
+                      <li>• Customizable content</li>
+                      <li>• Multi-language support ready</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <a 
+                    href="/admin/email" 
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    <Star className="h-4 w-4 mr-2" />
+                    Open Email Management Panel
+                  </a>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

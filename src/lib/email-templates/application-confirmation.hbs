@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Confirmation - IECA</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .logo {
+            max-width: 120px;
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .confirmation-box {
+            background: #f0f9ff;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .application-id {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #1d4ed8;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        .timeline {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .timeline h3 {
+            color: #0f172a;
+            margin-top: 0;
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+        }
+        .step-number {
+            background: #3b82f6;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .footer {
+            background: #f1f5f9;
+            padding: 20px 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="cid:ieca-logo" alt="IECA Logo" class="logo">
+            <h1>📝 Application Received</h1>
+            <p>Indian Error Cyber Army - Membership Application</p>
+        </div>
+        
+        <div class="content">
+            <p>Dear <strong>{{name}}</strong>,</p>
+            
+            <p>
+                Thank you for applying to join the <strong>Indian Error Cyber Army</strong>! We have successfully received your membership application and are excited to review your submission.
+            </p>
+            
+            <div class="confirmation-box">
+                <h3>✅ Application Confirmed</h3>
+                <p>Your application ID:</p>
+                <div class="application-id">{{applicationId}}</div>
+                <p><small>Please keep this ID for your records</small></p>
+            </div>
+            
+            <div class="timeline">
+                <h3>📋 What Happens Next:</h3>
+                
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div>
+                        <strong>Application Review</strong><br>
+                        Our team will review your application and credentials (2-3 business days)
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div>
+                        <strong>Background Verification</strong><br>
+                        We'll verify your cybersecurity experience and commitment to ethical practices
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div>
+                        <strong>Decision Notification</strong><br>
+                        You'll receive an email with our decision and next steps
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div>
+                        <strong>Welcome & Onboarding</strong><br>
+                        If approved, you'll get access to all IECA resources and community features
+                    </div>
+                </div>
+            </div>
+            
+            <p>
+                <strong>Application Status:</strong> Under Review<br>
+                <strong>Expected Response:</strong> Within 3-5 business days<br>
+                <strong>Support Contact:</strong> applications@ieca.zehrasec.com
+            </p>
+            
+            <p style="margin-top: 30px;">
+                We appreciate your interest in joining India's premier cybersecurity community. Our rigorous selection process ensures we maintain the highest standards of excellence and ethical commitment.
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>
+                <strong>Indian Error Cyber Army (IECA)</strong><br>
+                Building India's Cybersecurity Future
+            </p>
+            <p style="margin-top: 15px; font-size: 12px;">
+                This is an automated confirmation email. Please do not reply to this message.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

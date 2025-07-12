@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Status Update - IECA</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .logo {
+            max-width: 120px;
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .status-approved {
+            background: #f0fdf4;
+            border: 2px solid #22c55e;
+            color: #15803d;
+        }
+        .status-rejected {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            color: #dc2626;
+        }
+        .status-box {
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .footer {
+            background: #f1f5f9;
+            padding: 20px 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="cid:ieca-logo" alt="IECA Logo" class="logo">
+            <h1>📬 Application Status Update</h1>
+            <p>Indian Error Cyber Army - Membership Application</p>
+        </div>
+        
+        <div class="content">
+            <p>Dear <strong>{{name}}</strong>,</p>
+            
+            <p>
+                We have completed the review of your IECA membership application. Thank you for your patience during our evaluation process.
+            </p>
+            
+            {{#if (eq status "approved")}}
+            <div class="status-box status-approved">
+                <h2>🎉 Congratulations! Application Approved</h2>
+                <p>
+                    Welcome to the Indian Error Cyber Army! Your application has been approved, and you are now an official member of India's premier cybersecurity community.
+                </p>
+            </div>
+            
+            <p>
+                <strong>What's Next:</strong>
+            </p>
+            <ul>
+                <li>You now have full access to all IECA resources and tools</li>
+                <li>Join our exclusive global chat and connect with fellow cybersecurity professionals</li>
+                <li>Participate in CTF challenges and training sessions</li>
+                <li>Access our comprehensive cybersecurity library</li>
+                <li>Receive regular threat intelligence updates</li>
+            </ul>
+            
+            <div style="text-align: center;">
+                <a href="{{websiteUrl}}/portal/dashboard" class="cta-button">
+                    Access Your Member Portal 🚀
+                </a>
+            </div>
+            
+            <p>
+                We're excited to have you as part of our mission to strengthen India's cybersecurity infrastructure. Welcome aboard!
+            </p>
+            {{else}}
+            <div class="status-box status-rejected">
+                <h2>📋 Application Status: Not Approved</h2>
+                <p>
+                    After careful consideration, we are unable to approve your membership application at this time.
+                </p>
+            </div>
+            
+            {{#if reason}}
+            <p>
+                <strong>Feedback:</strong><br>
+                {{reason}}
+            </p>
+            {{/if}}
+            
+            <p>
+                <strong>Don't give up!</strong> We encourage you to:
+            </p>
+            <ul>
+                <li>Continue developing your cybersecurity skills and experience</li>
+                <li>Engage with the cybersecurity community</li>
+                <li>Consider applying again in the future (minimum 6 months)</li>
+                <li>Reach out to us if you have specific questions about improving your profile</li>
+            </ul>
+            
+            <p>
+                You can still access our public resources and stay connected with the cybersecurity community through our public channels.
+            </p>
+            {{/if}}
+        </div>
+        
+        <div class="footer">
+            <p>
+                <strong>Indian Error Cyber Army (IECA)</strong><br>
+                Building India's Cybersecurity Future
+            </p>
+            <p style="margin-top: 15px; font-size: 12px;">
+                For questions about your application, contact: applications@ieca.zehrasec.com
+            </p>
+        </div>
+    </div>
+</body>
+</html>
