@@ -23,7 +23,8 @@ import {
   Trash2,
   Copy,
   Check,
-  MoreVertical
+  MoreVertical,
+  MessageSquare
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -97,16 +98,18 @@ export function GlobalChat({ currentUserId }: GlobalChatProps) {
   const commonEmojis = ['👍', '❤️', '😂', '😢', '😮', '😡', '🔥', '🎉'];
 
   useEffect(() => {
-    fetchMessages();
-    
-    // Set up periodic updates
-    const interval = setInterval(() => {
+    if (currentUserId) {
       fetchMessages();
-      updateLastSeen();
-    }, 3000);
+      
+      // Set up periodic updates
+      const interval = setInterval(() => {
+        fetchMessages();
+        updateLastSeen();
+      }, 3000);
 
-    return () => clearInterval(interval);
-  }, []);
+      return () => clearInterval(interval);
+    }
+  }, [currentUserId]);
 
   useEffect(() => {
     // Only scroll to bottom after a short delay to ensure content is rendered
@@ -141,6 +144,8 @@ export function GlobalChat({ currentUserId }: GlobalChatProps) {
       if (result.success) {
         setMessages(result.data.messages);
         setOnlineMembers(result.data.onlineMembers);
+      } else {
+        console.error('Failed to fetch messages:', result.message);
       }
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -161,6 +166,15 @@ export function GlobalChat({ currentUserId }: GlobalChatProps) {
 
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
+    
+    if (!currentUserId) {
+      toast({
+        title: 'Error',
+        description: 'User not authenticated. Please refresh the page.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -641,7 +655,17 @@ export function GlobalChat({ currentUserId }: GlobalChatProps) {
       <CardContent className="flex-1 flex flex-col p-0 min-h-0">
         <ScrollArea ref={scrollAreaRef} className="flex-1 px-2 sm:px-4">
           <div className="space-y-1">
-            {messages.map(renderMessage)}
+            {messages.length === 0 ? (
+              <div className="flex items-center justify-center h-40">
+                <div className="text-center text-muted-foreground">
+                  <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No messages yet</p>
+                  <p className="text-xs">Start the conversation!</p>
+                </div>
+              </div>
+            ) : (
+              messages.map(renderMessage)
+            )}
             <div ref={messagesEndRef} />
           </div>
         </ScrollArea>

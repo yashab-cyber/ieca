@@ -2,12 +2,19 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { BookOpen, Users, User, BarChart2, MessageSquare, Settings, Trophy } from "lucide-react";
+import { BookOpen, Users, User, BarChart2, MessageSquare, Settings, Trophy, Shield } from "lucide-react";
 import { GlobalChat } from "@/components/global-chat";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
 const portalLinks = [
+  {
+    title: "Security Tools",
+    description: "Access comprehensive cybersecurity tools suite.",
+    icon: Shield,
+    href: "/portal/security",
+    color: "text-red-500"
+  },
   {
     title: "Member Directory",
     description: "Find and connect with other volunteers.",
@@ -50,9 +57,16 @@ export default function PortalDashboard() {
   const [currentUserId, setCurrentUserId] = useState<string>('');
 
   useEffect(() => {
-    // Use the admin user for demo purposes
-    // In a real app, this would come from authentication context
-    setCurrentUserId('cmcysuiuv00008mwmerfy4h5z'); // Yashab Alam (Admin)
+    // Get current user from localStorage
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        setCurrentUserId(user.id);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
+    }
   }, []);
 
   return (

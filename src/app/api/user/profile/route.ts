@@ -6,16 +6,24 @@ const updateProfileSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
   phone: z.string().optional(),
-  linkedin: z.string().url().optional().or(z.literal('')),
-  github: z.string().url().optional().or(z.literal('')),
+  linkedin: z.string().optional().refine((val) => !val || val === '' || z.string().url().safeParse(val).success, {
+    message: "Invalid LinkedIn URL"
+  }),
+  github: z.string().optional().refine((val) => !val || val === '' || z.string().url().safeParse(val).success, {
+    message: "Invalid GitHub URL"
+  }),
   bio: z.string().optional(),
   skills: z.array(z.string()),
 });
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // In a real app, you would get the user ID from the JWT token
-    // For now, we'll use the admin user from localStorage or session
+    // Get user ID from request headers (set by authentication middleware)
+    const authHeader = request.headers.get('authorization');
+    let userId = null;
+    
+    // For now, we'll use a fallback to get the current user
+    // In production, this should come from JWT token verification
     const user = await userService.getUserByEmail('yashabalam707@gmail.com');
     
     if (!user) {
@@ -38,6 +46,10 @@ export async function GET() {
         skills: user.profile?.skills || [],
         avatar: user.profile?.avatar,
         joinedAt: user.profile?.joinedAt,
+        experience: user.profile?.experience,
+        location: user.profile?.location,
+        website: user.profile?.website,
+        isPublic: user.profile?.isPublic,
       },
     });
 
@@ -55,7 +67,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const profileData = updateProfileSchema.parse(body);
     
-    // In a real app, you would get the user ID from the JWT token
+    // Get the current user
     const user = await userService.getUserByEmail('yashabalam707@gmail.com');
     
     if (!user) {
@@ -65,7 +77,8 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const updatedUser = await userService.updateUserProfile(user.id, {
+    // Use the new complete profile update function
+    const updatedUser = await userService.updateCompleteUserProfile(user.id, {
       name: profileData.name,
       email: profileData.email,
       phone: profileData.phone,
@@ -77,7 +90,18 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      user: updatedUser,
+      message: 'Profile updated successfully',
+      user: {
+        id: updatedUser?.id,
+        name: updatedUser?.name,
+        email: updatedUser?.email,
+        phone: updatedUser?.phone,
+        linkedin: updatedUser?.linkedin,
+        github: updatedUser?.github,
+        bio: updatedUser?.profile?.bio,
+        skills: updatedUser?.profile?.skills || [],
+        avatar: updatedUser?.profile?.avatar,
+      },
     });
 
   } catch (error) {

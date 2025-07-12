@@ -27,20 +27,16 @@ const skills = [
   { id: "red-teaming", label: "Red Teaming" },
 ] as const;
 
-const badges = [
-    { icon: Award, title: "Top Contributor", description: "Awarded for being in the top 10% of contributors for a quarter." },
-    { icon: Target, title: "Mission Specialist", description: "Successfully completed 5 critical incident responses." },
-    { icon: ShieldCheck, title: "Community Defender", description: "Resolved 25+ community-reported vulnerabilities." },
-    { icon: Zap, title: "Rapid Responder", description: "Acknowledged for exceptional speed in incident response." },
-];
-
-
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   email: z.string().email("Invalid email address."),
-  phone: z.string().min(10, "Please enter a valid 10-digit phone number."),
-  linkedin: z.string().url("Please enter a valid LinkedIn URL.").optional().or(z.literal('')),
-  github: z.string().url("Please enter a valid GitHub URL.").optional().or(z.literal('')),
+  phone: z.string().optional(),
+  linkedin: z.string().optional().refine((val) => !val || val === '' || z.string().url().safeParse(val).success, {
+    message: "Please enter a valid LinkedIn URL."
+  }),
+  github: z.string().optional().refine((val) => !val || val === '' || z.string().url().safeParse(val).success, {
+    message: "Please enter a valid GitHub URL."
+  }),
   skills: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: "You have to select at least one skill.",
   }),
@@ -52,6 +48,10 @@ export default function ProfilePage() {
   const { toast } = useToast();
   const [loading, setLoading] = React.useState(false);
   const [profileLoading, setProfileLoading] = React.useState(true);
+  const [currentAvatar, setCurrentAvatar] = React.useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = React.useState(false);
+  const [userStats, setUserStats] = React.useState<any>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
@@ -69,7 +69,23 @@ export default function ProfilePage() {
   // Load user profile on component mount
   React.useEffect(() => {
     loadUserProfile();
+    loadUserStats();
   }, []);
+
+  const loadUserStats = async () => {
+    try {
+      const response = await fetch('/api/user/stats');
+      const data = await response.json();
+      
+      if (data.success) {
+        setUserStats(data.stats);
+      } else {
+        console.error('Failed to load user stats:', data.message);
+      }
+    } catch (error) {
+      console.error('Error loading user stats:', error);
+    }
+  };
 
   const loadUserProfile = async () => {
     try {
@@ -79,6 +95,7 @@ export default function ProfilePage() {
       
       if (data.success) {
         const user = data.user;
+        setCurrentAvatar(user.avatar);
         form.reset({
           name: user.name || "",
           email: user.email || "",
@@ -104,6 +121,68 @@ export default function ProfilePage() {
       });
     } finally {
       setProfileLoading(false);
+    }
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid File Type",
+        description: "Only JPG, PNG, GIF, and WebP files are allowed.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Avatar must be smaller than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setAvatarUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/user/avatar', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setCurrentAvatar(result.avatarUrl);
+        toast({
+          title: "Avatar Updated",
+          description: "Your profile picture has been updated successfully.",
+        });
+        // Clear the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload avatar. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setAvatarUploading(false);
     }
   };
 
@@ -171,27 +250,33 @@ export default function ProfilePage() {
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                     <div className="p-4 bg-secondary/50 rounded-lg">
                         <p className="text-sm text-muted-foreground">Rank</p>
-                        <p className="text-2xl font-bold">#12</p>
+                        <p className="text-2xl font-bold">#{userStats?.rank || 0}</p>
                     </div>
                      <div className="p-4 bg-secondary/50 rounded-lg">
                         <p className="text-sm text-muted-foreground">Points</p>
-                        <p className="text-2xl font-bold">1,840</p>
+                        <p className="text-2xl font-bold">{userStats?.points || 0}</p>
                     </div>
                      <div className="p-4 bg-secondary/50 rounded-lg">
                         <p className="text-sm text-muted-foreground">Missions</p>
-                        <p className="text-2xl font-bold">8</p>
+                        <p className="text-2xl font-bold">{userStats?.missions || 0}</p>
                     </div>
                      <div className="p-4 bg-secondary/50 rounded-lg">
                         <p className="text-sm text-muted-foreground">Badges</p>
-                        <p className="text-2xl font-bold">{badges.length}</p>
+                        <p className="text-2xl font-bold">{userStats?.badges || 0}</p>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    {badges.map((badge) => {
-                        const Icon = badge.icon;
+                    {userStats?.badgeDetails?.map((badge: any) => {
+                        const iconMap: { [key: string]: any } = {
+                          'Award': Award,
+                          'Target': Target,
+                          'ShieldCheck': ShieldCheck,
+                          'Zap': Zap,
+                        };
+                        const Icon = iconMap[badge.icon] || Award;
                         return (
-                             <div key={badge.title} className="flex items-center gap-4 p-4 border rounded-lg bg-card">
+                             <div key={badge.id} className="flex items-center gap-4 p-4 border rounded-lg bg-card">
                                 <Icon className="h-8 w-8 text-primary"/>
                                 <div>
                                     <h4 className="font-bold text-sm">{badge.title}</h4>
@@ -200,6 +285,11 @@ export default function ProfilePage() {
                              </div>
                         )
                     })}
+                    {(!userStats?.badgeDetails || userStats.badgeDetails.length === 0) && (
+                      <div className="col-span-full text-center py-8">
+                        <p className="text-muted-foreground">No badges earned yet. Complete more security missions to unlock achievements!</p>
+                      </div>
+                    )}
                 </div>
 
             </CardContent>
@@ -213,14 +303,35 @@ export default function ProfilePage() {
             <CardContent className="space-y-8 pt-6">
                <div className="flex items-center gap-6">
                 <Avatar className="h-24 w-24 border-2 border-primary">
-                    <AvatarImage src="https://placehold.co/100x100.png" alt="Priya Singh" data-ai-hint="woman portrait professional" />
-                    <AvatarFallback>PS</AvatarFallback>
+                    <AvatarImage 
+                      src={currentAvatar || "https://placehold.co/100x100.png"} 
+                      alt="Profile Picture" 
+                    />
+                    <AvatarFallback>
+                      {form.watch('name')?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                    </AvatarFallback>
                 </Avatar>
                 <div className="grid gap-2">
                     <Label htmlFor="picture">Profile Picture</Label>
                     <div className="flex gap-2">
-                        <Input id="picture" type="file" className="max-w-xs" />
-                        <Button variant="outline"><Upload className="mr-2 h-4 w-4"/> Upload</Button>
+                        <Input 
+                          id="picture" 
+                          type="file" 
+                          className="max-w-xs" 
+                          accept="image/*"
+                          ref={fileInputRef}
+                          onChange={handleAvatarUpload}
+                          disabled={avatarUploading}
+                        />
+                        <Button 
+                          variant="outline" 
+                          type="button"
+                          disabled={avatarUploading}
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <Upload className="mr-2 h-4 w-4"/> 
+                          {avatarUploading ? 'Uploading...' : 'Upload'}
+                        </Button>
                     </div>
                     <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 5MB.</p>
                 </div>

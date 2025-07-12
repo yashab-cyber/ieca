@@ -32,6 +32,10 @@ model User {
   messageReactions GlobalChatReaction[] @relation("MessageReactions")
   createdRooms     GlobalChatRoom[]     @relation("CreatedRooms")
   profile          UserProfile?
+  securityUsage    SecurityToolUsage[]
+  securityScans    SecurityScan[]
+  vulnerabilityReports VulnerabilityReport[]
+  hashCrackSessions HashCrackSession[]
 
   @@map("users")
 }
@@ -157,6 +161,112 @@ model Activity {
   user        User         @relation(fields: [userId], references: [id])
 
   @@map("activities")
+}
+
+model SecurityTool {
+  id          String            @id @default(cuid())
+  name        String
+  type        SecurityToolType
+  description String
+  isActive    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  usage       SecurityToolUsage[]
+
+  @@map("security_tools")
+}
+
+model SecurityToolUsage {
+  id           String         @id @default(cuid())
+  toolId       String
+  userId       String
+  sessionId    String
+  inputData    Json
+  outputData   Json?
+  ipAddress    String?
+  userAgent    String?
+  status       UsageStatus    @default(PENDING)
+  error        String?
+  createdAt    DateTime       @default(now())
+  completedAt  DateTime?
+  tool         SecurityTool   @relation(fields: [toolId], references: [id])
+  user         User           @relation(fields: [userId], references: [id])
+  ipLogs       IpLogEntry[]
+
+  @@map("security_tool_usage")
+}
+
+model IpLogEntry {
+  id           String      @id @default(cuid())
+  sessionId    String
+  targetUrl    String
+  ipAddress    String?
+  userAgent    String?
+  country      String?
+  city         String?
+  region       String?
+  timezone     String?
+  isp          String?
+  device       String?
+  browser      String?
+  os           String?
+  referer      String?
+  clickedAt    DateTime?
+  metadata     Json?
+  createdAt    DateTime    @default(now())
+  usageId      String
+  usage        SecurityToolUsage @relation(fields: [usageId], references: [id])
+
+  @@map("ip_log_entries")
+}
+
+model SecurityScan {
+  id          String         @id @default(cuid())
+  userId      String
+  scanType    ScanType
+  target      String
+  results     Json
+  status      ScanStatus     @default(PENDING)
+  progress    Int            @default(0)
+  startedAt   DateTime       @default(now())
+  completedAt DateTime?
+  error       String?
+  user        User           @relation(fields: [userId], references: [id])
+
+  @@map("security_scans")
+}
+
+model VulnerabilityReport {
+  id          String           @id @default(cuid())
+  userId      String
+  title       String
+  description String
+  severity    VulnerabilitySeverity
+  target      String
+  proof       String?
+  status      ReportStatus     @default(PENDING)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  user        User             @relation(fields: [userId], references: [id])
+
+  @@map("vulnerability_reports")
+}
+
+model HashCrackSession {
+  id          String         @id @default(cuid())
+  userId      String
+  hash        String
+  hashType    HashType
+  dictionary  String?
+  rules       String?
+  status      CrackStatus    @default(PENDING)
+  result      String?
+  progress    Int            @default(0)
+  startedAt   DateTime       @default(now())
+  completedAt DateTime?
+  user        User           @relation(fields: [userId], references: [id])
+
+  @@map("hash_crack_sessions")
 }
 
 model ContactForm {
@@ -478,4 +588,96 @@ enum QueueStatus {
   SENT
   FAILED
   CANCELLED
+}
+
+enum SecurityToolType {
+  IP_LOGGER
+  PORT_SCANNER
+  VULNERABILITY_SCANNER
+  HASH_CRACKER
+  SUBDOMAIN_FINDER
+  DNS_LOOKUP
+  WHOIS_LOOKUP
+  SSL_CHECKER
+  HEADER_ANALYZER
+  URL_EXPANDER
+  PHISHING_DETECTOR
+  MALWARE_SCANNER
+}
+
+enum UsageStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum ScanType {
+  PORT_SCAN
+  VULN_SCAN
+  SUBDOMAIN_SCAN
+  DNS_SCAN
+  SSL_SCAN
+  HEADER_SCAN
+}
+
+enum ScanStatus {
+  PENDING
+  SCANNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum VulnerabilitySeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ReportStatus {
+  PENDING
+  INVESTIGATING
+  VERIFIED
+  FIXED
+  REJECTED
+  DUPLICATE
+}
+
+enum HashType {
+  MD5
+  SHA1
+  SHA256
+  SHA512
+  BCRYPT
+  SCRYPT
+  NTLM
+  LM
+}
+
+enum CrackStatus {
+  PENDING
+  CRACKING
+  CRACKED
+  FAILED
+  TIMEOUT
+}
+
+model ShortenedUrl {
+  id          String    @id @default(cuid())
+  originalUrl String
+  shortCode   String    @unique
+  customAlias String?   @unique
+  description String?
+  password    String?   // Hashed password for protected URLs
+  userId      String
+  clicks      Int       @default(0)
+  isActive    Boolean   @default(true)
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("shortened_urls")
 }

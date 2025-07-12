@@ -5,6 +5,121 @@ import bcrypt from 'bcryptjs';
 
 // User management functions
 export const userService = {
+  // Get user statistics
+  async getUserStats(userId: string) {
+    try {
+      // Get user with profile
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { profile: true },
+      });
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // Count security tool usage
+      const toolUsageCount = await prisma.securityToolUsage.count({
+        where: { userId },
+      });
+
+      // Count completed security scans
+      const completedScansCount = await prisma.securityScan.count({
+        where: { userId, status: 'COMPLETED' },
+      });
+
+      // Count vulnerability reports
+      const vulnerabilityReportsCount = await prisma.vulnerabilityReport.count({
+        where: { userId },
+      });
+
+      // Count hash crack sessions
+      const hashCrackSessionsCount = await prisma.hashCrackSession.count({
+        where: { userId },
+      });
+
+      // Count global chat messages
+      const chatMessagesCount = await prisma.globalChatMessage.count({
+        where: { userId },
+      });
+
+      // Calculate total activities/missions
+      const totalMissions = toolUsageCount + completedScansCount + vulnerabilityReportsCount + hashCrackSessionsCount;
+
+      // Get user's rank based on points
+      const usersWithHigherPoints = await prisma.userProfile.count({
+        where: { 
+          points: { gt: user.profile?.points || 0 },
+          isPublic: true 
+        },
+      });
+      const userRank = usersWithHigherPoints + 1;
+
+      // Calculate badges earned (based on achievements)
+      const badges = [];
+      
+      // Top Contributor badge (top 10% of users by points)
+      const totalPublicUsers = await prisma.userProfile.count({
+        where: { isPublic: true },
+      });
+      if (userRank <= Math.ceil(totalPublicUsers * 0.1)) {
+        badges.push({
+          id: 'top-contributor',
+          title: 'Top Contributor',
+          description: 'Awarded for being in the top 10% of contributors.',
+          icon: 'Award'
+        });
+      }
+
+      // Mission Specialist badge (5+ completed activities)
+      if (totalMissions >= 5) {
+        badges.push({
+          id: 'mission-specialist',
+          title: 'Mission Specialist',
+          description: 'Successfully completed 5+ security missions.',
+          icon: 'Target'
+        });
+      }
+
+      // Community Defender badge (3+ vulnerability reports)
+      if (vulnerabilityReportsCount >= 3) {
+        badges.push({
+          id: 'community-defender',
+          title: 'Community Defender',
+          description: 'Reported 3+ security vulnerabilities.',
+          icon: 'ShieldCheck'
+        });
+      }
+
+      // Rapid Responder badge (10+ chat messages)
+      if (chatMessagesCount >= 10) {
+        badges.push({
+          id: 'rapid-responder',
+          title: 'Rapid Responder',
+          description: 'Active community member with 10+ chat messages.',
+          icon: 'Zap'
+        });
+      }
+
+      return {
+        rank: userRank,
+        points: user.profile?.points || 0,
+        missions: totalMissions,
+        badges: badges.length,
+        badgeDetails: badges,
+        toolUsage: toolUsageCount,
+        scansCompleted: completedScansCount,
+        vulnerabilityReports: vulnerabilityReportsCount,
+        chatMessages: chatMessagesCount,
+        reputation: user.profile?.reputation || 0,
+        joinedAt: user.profile?.joinedAt || user.createdAt,
+      };
+    } catch (error) {
+      console.error('Error getting user stats:', error);
+      throw error;
+    }
+  },
+
   // Create a new user
   async createUser(data: {
     email: string;
@@ -87,6 +202,70 @@ export const userService = {
     return prisma.userProfile.update({
       where: { userId },
       data,
+    });
+  },
+
+  // Update complete user profile (both User and UserProfile tables)
+  async updateCompleteUserProfile(userId: string, data: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    linkedin?: string;
+    github?: string;
+    bio?: string;
+    skills?: string[];
+    experience?: string;
+    location?: string;
+    website?: string;
+    avatar?: string;
+    isPublic?: boolean;
+  }) {
+    // Separate user fields from profile fields
+    const userFields = {
+      ...(data.name && { name: data.name }),
+      ...(data.email && { email: data.email }),
+      ...(data.phone && { phone: data.phone }),
+      ...(data.linkedin && { linkedin: data.linkedin }),
+      ...(data.github && { github: data.github }),
+    };
+
+    const profileFields = {
+      ...(data.bio !== undefined && { bio: data.bio }),
+      ...(data.skills && { skills: data.skills }),
+      ...(data.experience && { experience: data.experience }),
+      ...(data.location && { location: data.location }),
+      ...(data.website && { website: data.website }),
+      ...(data.avatar !== undefined && { avatar: data.avatar }),
+      ...(data.isPublic !== undefined && { isPublic: data.isPublic }),
+    };
+
+    // Use transaction to update both tables
+    return prisma.$transaction(async (tx) => {
+      // Update user table if there are user fields
+      if (Object.keys(userFields).length > 0) {
+        await tx.user.update({
+          where: { id: userId },
+          data: userFields,
+        });
+      }
+
+      // Update or create profile if there are profile fields
+      if (Object.keys(profileFields).length > 0) {
+        await tx.userProfile.upsert({
+          where: { userId },
+          update: profileFields,
+          create: {
+            userId,
+            ...profileFields,
+          },
+        });
+      }
+
+      // Return the updated user with profile
+      return tx.user.findUnique({
+        where: { id: userId },
+        include: { profile: true },
+      });
     });
   },
 
