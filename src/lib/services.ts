@@ -378,17 +378,10 @@ export const applicationService = {
 
         if (!existingUser) {
           // Create new user account with generated password
-          // Convert null values to undefined for compatibility with PasswordService
-          const applicationData = {
-            ...application,
-            linkedin: application.linkedin || undefined,
-            github: application.github || undefined,
-          };
-          const { user, tempPassword } = await PasswordService.createUserAccountFromApplication(applicationData);
+          const { user, tempPassword } = await PasswordService.createUserAccountFromApplication(application);
           
           // Send login credentials email
-          const badgeEmailService = new BadgeEmailService();
-          await badgeEmailService.sendLoginCredentialsEmail(
+          await BadgeEmailService.sendLoginCredentialsEmail(
             application.email,
             application.name,
             application.email,

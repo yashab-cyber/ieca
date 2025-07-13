@@ -6,15 +6,17 @@ import { prisma } from '@/lib/database';
 
 export async function POST(request: NextRequest) {
   try {
+    // Authenticate user using JWT
     const authResult = await authenticateUser(request);
     
     if ('error' in authResult) {
       return NextResponse.json(
-        { error: authResult.error },
+        { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
+    const { user } = authResult;
     const { currentPassword, newPassword } = await request.json();
 
     if (!currentPassword || !newPassword) {
@@ -33,12 +35,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user info for confirmation email
-    const user = await prisma.user.findUnique({
-      where: { id: authResult.user.id },
+    const userDetails = await prisma.user.findUnique({
+      where: { id: user.id },
       select: { id: true, email: true, name: true },
     });
 
-    if (!user) {
+    if (!userDetails) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
@@ -47,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     // Change password
     const success = await PasswordService.changePassword(
-      authResult.user.id,
+      user.id,
       currentPassword,
       newPassword
     );
@@ -60,10 +62,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Send password change confirmation email
-    const badgeEmailService = new BadgeEmailService();
-    await badgeEmailService.sendPasswordChangeConfirmationEmail(
-      user.email,
-      user.name
+    await BadgeEmailService.sendPasswordChangeConfirmationEmail(
+      userDetails.email,
+      userDetails.name
     );
 
     return NextResponse.json(

@@ -2,18 +2,6 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/database';
 
-interface ApplicationData {
-  name: string;
-  email: string;
-  phone?: string;
-  skills?: string[];
-  experience?: string;
-  motivation?: string;
-  github?: string;
-  linkedin?: string;
-  portfolio?: string;
-}
-
 export class PasswordService {
   // Generate a random secure password
   static generatePassword(length: number = 12): string {
@@ -58,120 +46,100 @@ export class PasswordService {
   }
 
   // Create user account with generated password
-  static async createUserAccountFromApplication(application: ApplicationData): Promise<{ user: any; tempPassword: string }> {
+  static async createUserAccountFromApplication(application: any): Promise<{ user: any; tempPassword: string }> {
     const tempPassword = this.generatePassword(12);
     const hashedPassword = await this.hashPassword(tempPassword);
 
-    try {
-      // Create user account
-      const user = await prisma.user.create({
-        data: {
-          name: application.name,
-          email: application.email,
-          phone: application.phone,
-          password: hashedPassword,
-          role: 'MEMBER',
-          isActive: true,
-          lastLoginAt: null,
-          profile: {
-            create: {
-              skills: application.skills || [],
-              isPublic: true,
-              reputation: 0,
-              points: 100 // Welcome points
-            }
+    // Create user account
+    const user = await prisma.user.create({
+      data: {
+        name: application.name,
+        email: application.email,
+        password: hashedPassword,
+        role: 'MEMBER',
+        isActive: true,
+        lastLoginAt: null,
+        profile: {
+          create: {
+            phone: application.phone || '',
+            skills: application.skills || [],
+            experience: application.experience || '',
+            motivation: application.motivation || '',
+            github: application.github || '',
+            linkedin: application.linkedin || '',
+            portfolio: application.portfolio || '',
+            joinedAt: new Date(),
+            isPublic: true,
+            reputation: 0,
+            points: 100 // Welcome points
           }
-        },
-        include: {
-          profile: true
         }
-      });
+      },
+      include: {
+        profile: true
+      }
+    });
 
-      return { user, tempPassword };
-    } catch (error) {
-      console.error('Error creating user account from application:', error);
-      throw new Error('Failed to create user account');
-    }
+    return { user, tempPassword };
   }
 
   // Create password reset request
   static async createPasswordResetRequest(email: string): Promise<{ user: any; resetToken: string } | null> {
-    try {
-      // Find user by email
-      const user = await prisma.user.findUnique({
-        where: { email },
-      });
+    // Find user by email
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
 
-      if (!user) {
-        return null;
-      }
-
-      // Generate reset token
-      const resetToken = this.generateResetToken();
-      const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
-
-      // Save reset token to user (temporarily commented out until migration completes)
-      // await prisma.user.update({
-      //   where: { id: user.id },
-      //   data: {
-      //     resetToken,
-      //     resetTokenExpiry,
-      //   },
-      // });
-
-      // For now, we'll store the token in memory or use a different approach
-      console.log('Reset token generated:', resetToken);
-      console.log('TODO: Store reset token in database after migration completes');
-
-      return { user, resetToken };
-    } catch (error) {
-      console.error('Error creating password reset request:', error);
-      throw new Error('Failed to create password reset request');
+    if (!user) {
+      return null;
     }
+
+    // Generate reset token
+    const resetToken = this.generateResetToken();
+    const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
+
+    // Save reset token to user
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetToken,
+        resetTokenExpiry,
+      },
+    });
+
+    return { user, resetToken };
   }
 
   // Reset password with token
   static async resetPasswordWithToken(token: string, newPassword: string): Promise<boolean> {
-    try {
-      // Find user with valid reset token (temporarily simplified)
-      // const user = await prisma.user.findFirst({
-      //   where: {
-      //     resetToken: token,
-      //     resetTokenExpiry: {
-      //       gt: new Date(), // Token not expired
-      //     },
-      //   },
-      // });
+    // Find user with valid reset token
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExpiry: {
+          gt: new Date(), // Token not expired
+        },
+      },
+    });
 
-      // Temporary implementation - find user by any available method
-      // This should be replaced with proper token validation after migration
-      console.log('TODO: Implement proper token validation after database migration');
-      
-      // For now, return false to indicate this feature needs migration
-      return false;
-
-      // if (!user) {
-      //   return false;
-      // }
-
-      // // Hash new password
-      // const hashedPassword = await this.hashPassword(newPassword);
-
-      // // Update user password and clear reset token
-      // await prisma.user.update({
-      //   where: { id: user.id },
-      //   data: {
-      //     password: hashedPassword,
-      //     resetToken: null,
-      //     resetTokenExpiry: null,
-      //   },
-      // });
-
-      // return true;
-    } catch (error) {
-      console.error('Error resetting password with token:', error);
+    if (!user) {
       return false;
     }
+
+    // Hash new password
+    const hashedPassword = await this.hashPassword(newPassword);
+
+    // Update user password and clear reset token
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpiry: null,
+      },
+    });
+
+    return true;
   }
 
   // Change password for authenticated user

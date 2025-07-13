@@ -817,7 +817,7 @@ Welcome aboard! 🚀`
   }
 
   // Send login credentials email to newly approved members
-  async sendLoginCredentialsEmail(to: string, name: string, email: string, tempPassword: string): Promise<boolean> {
+  static async sendLoginCredentialsEmail(to: string, name: string, email: string, tempPassword: string): Promise<boolean> {
     const subject = 'Welcome to IECA - Your Login Credentials';
     
     const html = `
@@ -991,7 +991,7 @@ Welcome aboard! 🚀`
   }
 
   // Send password reset email
-  async sendPasswordResetEmail(to: string, name: string, resetToken: string): Promise<boolean> {
+  static async sendPasswordResetEmail(to: string, name: string, resetToken: string): Promise<boolean> {
     const subject = 'IECA - Password Reset Request';
     const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password?token=${resetToken}`;
     
@@ -1106,7 +1106,7 @@ Welcome aboard! 🚀`
   }
 
   // Send password change confirmation email
-  async sendPasswordChangeConfirmationEmail(to: string, name: string): Promise<boolean> {
+  static async sendPasswordChangeConfirmationEmail(to: string, name: string): Promise<boolean> {
     const subject = 'IECA - Password Changed Successfully';
     
     const html = `

@@ -23,16 +23,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user info before resetting password (for confirmation email)
-    // Using raw SQL as workaround for Prisma client cache issue
-    const users = await prisma.$queryRaw<Array<{id: string, email: string, name: string}>>`
-      SELECT id, email, name 
-      FROM "User" 
-      WHERE "resetToken" = ${token} 
-      AND "resetTokenExpiry" > NOW()
-      LIMIT 1
-    `;
-    
-    const user = users[0];
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExpiry: {
+          gt: new Date(), // Token not expired
+        },
+      },
+      select: { id: true, email: true, name: true },
+    });
 
     if (!user) {
       return NextResponse.json(
@@ -52,8 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send password change confirmation email
-    const badgeEmailService = new BadgeEmailService();
-    await badgeEmailService.sendPasswordChangeConfirmationEmail(
+    await BadgeEmailService.sendPasswordChangeConfirmationEmail(
       user.email,
       user.name
     );

@@ -25,8 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send password reset email
-    const badgeEmailService = new BadgeEmailService();
-    await badgeEmailService.sendPasswordResetEmail(
+    await BadgeEmailService.sendPasswordResetEmail(
       resetRequest.user.email,
       resetRequest.user.name,
       resetRequest.resetToken
