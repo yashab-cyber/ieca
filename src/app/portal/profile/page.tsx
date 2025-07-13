@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Upload, Award, Target, ShieldCheck, Zap, TrendingUp, Calendar, Activity, Users, MessageSquare, FileText, Clock, Trophy, ExternalLink } from "lucide-react";
+import { Upload, Award, Target, ShieldCheck, Zap, TrendingUp, Calendar, Activity, Users, MessageSquare, FileText, Clock, Trophy, ExternalLink, UserPlus } from "lucide-react";
 import React from 'react';
 
 const skills = [
@@ -336,6 +336,7 @@ export default function ProfilePage() {
                               'Calendar': Calendar,
                               'Crown': Trophy,
                               'Trophy': Trophy,
+                              'UserPlus': UserPlus,
                             };
                             const Icon = iconMap[badge.icon] || Award;
                             return (

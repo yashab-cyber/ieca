@@ -150,6 +150,17 @@ export async function GET(request: NextRequest) {
     const badges = [];
     let badgeCount = 0;
 
+    // Welcome badge - given to all users (first login)
+    badges.push({
+      id: 'welcome-aboard',
+      title: 'Welcome Aboard!',
+      description: 'Joined the IECA cybersecurity community',
+      icon: 'UserPlus',
+      type: 'welcome',
+      earnedAt: user.createdAt.toISOString(),
+    });
+    badgeCount++;
+
     // Security Expert badges
     if (securityUsageCount >= 50) {
       badges.push({

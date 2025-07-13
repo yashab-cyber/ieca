@@ -9,6 +9,14 @@ export async function GET(request: NextRequest) {
     // All badge types to test
     const testBadges = [
       {
+        id: 'welcome-aboard',
+        title: 'Welcome Aboard!',
+        description: 'Successfully joined the IECA cybersecurity community',
+        icon: 'UserPlus',
+        type: 'welcome' as const,
+        earnedAt: new Date().toISOString(),
+      },
+      {
         id: 'security-expert',
         title: 'Security Expert',
         description: 'Used 50+ security tools',
@@ -88,14 +96,27 @@ export async function GET(request: NextRequest) {
       
       for (const badge of testBadges) {
         try {
-          const result = await BadgeEmailService.sendBadgeEarnedEmail({
-            userId: 'test-user',
-            userEmail: 'yashabalam707@gmail.com',
-            userName: 'Yashab Alam',
-            badge: badge,
-            totalBadges: 12,
-            nextBadgeHint: 'Keep engaging to unlock more badges!'
-          });
+          let result;
+          
+          // Use special welcome email for welcome badge
+          if (badge.type === 'welcome') {
+            result = await BadgeEmailService.sendWelcomeEmail({
+              userId: 'test-user',
+              userEmail: 'yashabalam707@gmail.com',
+              userName: 'Yashab Alam',
+              badge: badge,
+              totalBadges: 1
+            });
+          } else {
+            result = await BadgeEmailService.sendBadgeEarnedEmail({
+              userId: 'test-user',
+              userEmail: 'yashabalam707@gmail.com',
+              userName: 'Yashab Alam',
+              badge: badge,
+              totalBadges: 12,
+              nextBadgeHint: 'Keep engaging to unlock more badges!'
+            });
+          }
 
           results.push({
             badgeType: badge.type,

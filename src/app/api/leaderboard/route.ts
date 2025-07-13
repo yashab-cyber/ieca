@@ -87,6 +87,32 @@ export async function GET(request: NextRequest) {
         // Calculate reputation based on vulnerability reports and blog posts
         const reputation = (member._count.vulnerabilityReports * 10) + (member._count.blogPosts * 5) + (member.profile?.reputation || 0);
         
+        // Calculate badges
+        let badgeCount = 1; // Everyone gets welcome badge
+        
+        // Security badges
+        if (member._count.securityUsage >= 50) badgeCount++;
+        else if (member._count.securityUsage >= 20) badgeCount++;
+        
+        // Scanner badges
+        if (member._count.securityScans >= 25) badgeCount++;
+        else if (member._count.securityScans >= 10) badgeCount++;
+        
+        // Researcher badges
+        if (member._count.vulnerabilityReports >= 10) badgeCount++;
+        else if (member._count.vulnerabilityReports >= 5) badgeCount++;
+        
+        // Content badges
+        if (member._count.blogPosts >= 10) badgeCount++;
+        else if (member._count.blogPosts >= 3) badgeCount++;
+        
+        // Community badges
+        if (member._count.chatMessages >= 100) badgeCount++;
+        
+        // Login streak badges (simplified - in real app, track login history)
+        const daysSinceJoined = Math.floor((new Date().getTime() - new Date(member.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+        if (member._count.securityUsage >= 20) badgeCount++; // Active users get streak badges
+        
         return {
           id: member.id,
           name: member.name,
@@ -94,6 +120,7 @@ export async function GET(request: NextRequest) {
           reputation,
           rank_title: rankTitle,
           completedMissions: totalActivities,
+          badges: badgeCount,
           avatar: member.profile?.avatar || `/api/avatar/${member.id}`,
           securityUsage: member._count.securityUsage,
           securityScans: member._count.securityScans,

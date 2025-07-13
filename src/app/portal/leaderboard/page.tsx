@@ -25,6 +25,15 @@ interface LeaderboardMember {
   chatMessages: number;
   joinedAt: string;
   lastActive?: string;
+  badges: number;
+  badgeDetails?: Array<{
+    id: string;
+    title: string;
+    description: string;
+    icon: string;
+    type: string;
+    earnedAt: string;
+  }>;
 }
 
 const rankColors: Record<number, string> = {
@@ -165,6 +174,11 @@ export default function LeaderboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center space-y-2">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <Trophy className="h-4 w-4 text-purple-500" />
+                <span className="font-bold text-lg">{member.badges || 0}</span>
+                <span className="text-xs text-muted-foreground">badges</span>
+              </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="flex items-center justify-center gap-1">
                   <Shield className="h-3 w-3" />
@@ -204,6 +218,7 @@ export default function LeaderboardPage() {
                 <TableRow>
                   <TableHead className="w-[60px]">Rank</TableHead>
                   <TableHead>Member</TableHead>
+                  <TableHead className="text-center">Badges</TableHead>
                   <TableHead className="text-center">Tools</TableHead>
                   <TableHead className="text-center">Scans</TableHead>
                   <TableHead className="text-center">Reports</TableHead>
@@ -231,6 +246,12 @@ export default function LeaderboardPage() {
                           <div className="font-medium">{member.name}</div>
                           <div className="text-xs text-muted-foreground">{member.rank_title}</div>
                         </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <Trophy className="h-3 w-3 text-purple-500" />
+                        <span className="font-medium">{member.badges || 0}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
