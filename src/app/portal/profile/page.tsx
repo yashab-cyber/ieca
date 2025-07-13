@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Upload, Award, Target, ShieldCheck, Zap, TrendingUp, Calendar, Activity, Users, MessageSquare, FileText, Clock, Trophy, ExternalLink, UserPlus } from "lucide-react";
 import React from 'react';
+import ChangePasswordCard from '@/components/change-password-card';
 
 const skills = [
   { id: "pentesting", label: "Penetration Testing" },
@@ -561,6 +562,8 @@ export default function ProfilePage() {
                </div>
             </CardContent>
           </Card>
+          
+          <ChangePasswordCard />
           
           <div className="flex justify-end">
             <Button type="submit" size="lg" disabled={loading}>

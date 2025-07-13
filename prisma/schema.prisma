@@ -17,6 +17,8 @@ model User {
   github           String?
   role             UserRole             @default(MEMBER)
   isActive         Boolean              @default(true)
+  resetToken       String?
+  resetTokenExpiry DateTime?
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
   lastLoginAt      DateTime?
@@ -47,6 +49,11 @@ model UserProfile {
   avatar     String?
   skills     String[]
   experience String?
+  motivation String?
+  phone      String?
+  github     String?
+  linkedin   String?
+  portfolio  String?
   location   String?
   website    String?
   isPublic   Boolean  @default(false)

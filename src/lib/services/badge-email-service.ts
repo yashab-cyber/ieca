@@ -815,4 +815,414 @@ Welcome aboard! 🚀`
       return false;
     }
   }
+
+  // Send login credentials email to newly approved members
+  async sendLoginCredentialsEmail(to: string, name: string, email: string, tempPassword: string): Promise<boolean> {
+    const subject = 'Welcome to IECA - Your Login Credentials';
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Welcome to IECA - Login Credentials</title>
+      </head>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center;">
+            <img src="cid:logo" alt="IECA Logo" style="width: 80px; height: 80px; margin-bottom: 20px; border-radius: 50%;">
+            <h1 style="margin: 0; font-size: 28px; font-weight: 300;">Welcome to IECA!</h1>
+            <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Your application has been approved</p>
+          </div>
+          
+          <!-- Content -->
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #333; margin-bottom: 20px; font-size: 24px;">Congratulations, ${name}!</h2>
+            
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; margin: 20px 0;">
+              <p style="margin: 0 0 10px 0; font-size: 18px; font-weight: 600;">🎉 Application Approved!</p>
+              <p style="margin: 0; font-size: 14px; opacity: 0.9;">You are now an official member of the IECA community!</p>
+            </div>
+            
+            <p style="color: #555; line-height: 1.6; margin: 20px 0;">
+              Your membership application has been approved! You can now access the IECA Member Portal with the login credentials below.
+            </p>
+
+            <!-- Login Credentials Box -->
+            <div style="background-color: #f8f9fa; border: 2px solid #e9ecef; border-radius: 10px; padding: 25px; margin: 25px 0;">
+              <h3 style="color: #333; margin: 0 0 15px 0; font-size: 18px;">🔐 Your Login Credentials</h3>
+              
+              <div style="margin: 15px 0;">
+                <strong style="color: #667eea;">Email:</strong>
+                <div style="background: white; padding: 10px; border-radius: 5px; border: 1px solid #ddd; margin-top: 5px; font-family: monospace; font-size: 14px;">
+                  ${email}
+                </div>
+              </div>
+              
+              <div style="margin: 15px 0;">
+                <strong style="color: #667eea;">Temporary Password:</strong>
+                <div style="background: white; padding: 10px; border-radius: 5px; border: 1px solid #ddd; margin-top: 5px; font-family: monospace; font-size: 14px; font-weight: bold;">
+                  ${tempPassword}
+                </div>
+              </div>
+              
+              <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 10px; margin-top: 15px;">
+                <p style="margin: 0; color: #856404; font-size: 12px;">
+                  ⚠️ <strong>Important:</strong> Please change your password after your first login for security.
+                </p>
+              </div>
+            </div>
+
+            <!-- Quick Start Guide -->
+            <div style="background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); color: white; padding: 20px; border-radius: 10px; margin: 25px 0;">
+              <h3 style="margin: 0 0 15px 0; font-size: 18px;">🚀 Quick Start Guide</h3>
+              <ol style="margin: 0; padding-left: 20px; line-height: 1.6;">
+                <li>Visit the <a href="${process.env.NEXT_PUBLIC_BASE_URL}/login" style="color: #fff; text-decoration: underline;">IECA Member Portal</a></li>
+                <li>Login with your email and temporary password</li>
+                <li>Complete your profile and change your password</li>
+                <li>Explore security tools and resources</li>
+                <li>Connect with other members in our community</li>
+              </ol>
+            </div>
+
+            <!-- Features Overview -->
+            <div style="margin: 30px 0;">
+              <h3 style="color: #333; margin-bottom: 20px;">What's Available in Your Portal:</h3>
+              
+              <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                <div style="flex: 1; min-width: 250px; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
+                  <h4 style="margin: 0 0 8px 0; color: #667eea;">🛡️ Security Tools</h4>
+                  <p style="margin: 0; color: #666; font-size: 14px;">Access advanced security scanners, vulnerability assessment tools, and more.</p>
+                </div>
+                
+                <div style="flex: 1; min-width: 250px; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #00b894;">
+                  <h4 style="margin: 0 0 8px 0; color: #00b894;">📚 Resource Library</h4>
+                  <p style="margin: 0; color: #666; font-size: 14px;">Browse our extensive collection of cybersecurity books and educational content.</p>
+                </div>
+                
+                <div style="flex: 1; min-width: 250px; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #fd79a8;">
+                  <h4 style="margin: 0 0 8px 0; color: #fd79a8;">🏆 Achievement System</h4>
+                  <p style="margin: 0; color: #666; font-size: 14px;">Earn badges and climb the leaderboard as you engage with our platform.</p>
+                </div>
+                
+                <div style="flex: 1; min-width: 250px; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #fdcb6e;">
+                  <h4 style="margin: 0 0 8px 0; color: #fdcb6e;">💬 Community Chat</h4>
+                  <p style="margin: 0; color: #666; font-size: 14px;">Connect with fellow cybersecurity enthusiasts and share knowledge.</p>
+                </div>
+              </div>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${process.env.NEXT_PUBLIC_BASE_URL}/login" 
+                 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; padding: 15px 40px; border-radius: 25px; font-weight: 600; display: inline-block; transition: transform 0.2s;">
+                Access Member Portal
+              </a>
+            </div>
+
+            <p style="color: #777; font-size: 14px; text-align: center; margin: 30px 0 0 0;">
+              Need help? Contact us at <a href="mailto:support@ieca.com" style="color: #667eea;">support@ieca.com</a>
+            </p>
+          </div>
+          
+          <!-- Footer -->
+          <div style="background-color: #2d3748; color: white; padding: 30px; text-align: center;">
+            <p style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600;">Welcome to the IECA Community!</p>
+            <p style="margin: 0; color: #a0aec0; font-size: 14px;">
+              Indian Ethical Cyber Army - Securing the Digital Future
+            </p>
+            <div style="margin-top: 20px;">
+              <a href="${process.env.NEXT_PUBLIC_BASE_URL}" style="color: #667eea; text-decoration: none; margin: 0 10px;">Website</a>
+              <a href="${process.env.NEXT_PUBLIC_BASE_URL}/contact" style="color: #667eea; text-decoration: none; margin: 0 10px;">Contact</a>
+              <a href="${process.env.NEXT_PUBLIC_BASE_URL}/privacy-policy" style="color: #667eea; text-decoration: none; margin: 0 10px;">Privacy</a>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    try {
+      const mailOptions = {
+        from: `"IECA Cybersecurity" <${process.env.SMTP_USER}>`,
+        to: to,
+        subject: subject,
+        html: html,
+        text: `Welcome to IECA, ${name}! Your login credentials: Email: ${email}, Temporary Password: ${tempPassword}. Please change your password after first login.`
+      };
+
+      const result = await BadgeEmailService.transporter.sendMail(mailOptions);
+      console.log('Login credentials email sent:', result.messageId);
+
+      // Log the email
+      await prisma.emailLog.create({
+        data: {
+          recipient: to,
+          subject: subject,
+          status: 'SENT',
+          sentAt: new Date(),
+          metadata: {
+            emailType: 'login_credentials',
+            tempPassword: 'hidden_for_security'
+          }
+        }
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Failed to send login credentials email:', error);
+      
+      // Log the failed email
+      await prisma.emailLog.create({
+        data: {
+          recipient: to,
+          subject: subject,
+          status: 'FAILED',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          metadata: {
+            emailType: 'login_credentials'
+          }
+        }
+      });
+
+      return false;
+    }
+  }
+
+  // Send password reset email
+  async sendPasswordResetEmail(to: string, name: string, resetToken: string): Promise<boolean> {
+    const subject = 'IECA - Password Reset Request';
+    const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password?token=${resetToken}`;
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>IECA - Password Reset</title>
+      </head>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center;">
+            <img src="cid:logo" alt="IECA Logo" style="width: 80px; height: 80px; margin-bottom: 20px; border-radius: 50%;">
+            <h1 style="margin: 0; font-size: 28px; font-weight: 300;">Password Reset Request</h1>
+            <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Secure your IECA account</p>
+          </div>
+          
+          <!-- Content -->
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #333; margin-bottom: 20px; font-size: 24px;">Hello ${name},</h2>
+            
+            <p style="color: #555; line-height: 1.6; margin: 20px 0;">
+              We received a request to reset your password for your IECA Member Portal account. If you made this request, click the button below to reset your password.
+            </p>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetUrl}" 
+                 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; padding: 15px 40px; border-radius: 25px; font-weight: 600; display: inline-block;">
+                Reset Your Password
+              </a>
+            </div>
+
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 25px 0;">
+              <p style="margin: 0 0 10px 0; color: #856404; font-weight: 600;">⏰ Important Security Information:</p>
+              <ul style="margin: 0; padding-left: 20px; color: #856404; font-size: 14px;">
+                <li>This reset link will expire in 1 hour</li>
+                <li>Only use this link if you requested a password reset</li>
+                <li>If you didn't request this, please ignore this email</li>
+              </ul>
+            </div>
+
+            <p style="color: #777; font-size: 14px; margin: 20px 0;">
+              If the button doesn't work, copy and paste this link into your browser:<br>
+              <a href="${resetUrl}" style="color: #667eea; word-break: break-all;">${resetUrl}</a>
+            </p>
+
+            <p style="color: #777; font-size: 14px; text-align: center; margin: 30px 0 0 0;">
+              Need help? Contact us at <a href="mailto:support@ieca.com" style="color: #667eea;">support@ieca.com</a>
+            </p>
+          </div>
+          
+          <!-- Footer -->
+          <div style="background-color: #2d3748; color: white; padding: 30px; text-align: center;">
+            <p style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600;">IECA Security Team</p>
+            <p style="margin: 0; color: #a0aec0; font-size: 14px;">
+              Indian Ethical Cyber Army - Securing the Digital Future
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    try {
+      const mailOptions = {
+        from: `"IECA Cybersecurity" <${process.env.SMTP_USER}>`,
+        to: to,
+        subject: subject,
+        html: html,
+        text: `Password Reset Request - IECA. Hello ${name}, we received a request to reset your password. Reset link: ${resetUrl} (expires in 1 hour). If you didn't request this, please ignore this email.`
+      };
+
+      const result = await BadgeEmailService.transporter.sendMail(mailOptions);
+      console.log('Password reset email sent:', result.messageId);
+
+      // Log the email
+      await prisma.emailLog.create({
+        data: {
+          recipient: to,
+          subject: subject,
+          status: 'SENT',
+          sentAt: new Date(),
+          metadata: {
+            emailType: 'password_reset',
+            resetToken: 'hidden_for_security'
+          }
+        }
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Failed to send password reset email:', error);
+      
+      // Log the failed email
+      await prisma.emailLog.create({
+        data: {
+          recipient: to,
+          subject: subject,
+          status: 'FAILED',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          metadata: {
+            emailType: 'password_reset'
+          }
+        }
+      });
+
+      return false;
+    }
+  }
+
+  // Send password change confirmation email
+  async sendPasswordChangeConfirmationEmail(to: string, name: string): Promise<boolean> {
+    const subject = 'IECA - Password Changed Successfully';
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>IECA - Password Changed</title>
+      </head>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #00b894 0%, #00a085 100%); color: white; padding: 40px 20px; text-align: center;">
+            <img src="cid:logo" alt="IECA Logo" style="width: 80px; height: 80px; margin-bottom: 20px; border-radius: 50%;">
+            <h1 style="margin: 0; font-size: 28px; font-weight: 300;">Password Changed</h1>
+            <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Your account is secure</p>
+          </div>
+          
+          <!-- Content -->
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #333; margin-bottom: 20px; font-size: 24px;">Hello ${name},</h2>
+            
+            <div style="background: linear-gradient(135deg, #00b894 0%, #00a085 100%); color: white; padding: 20px; border-radius: 10px; margin: 20px 0;">
+              <p style="margin: 0 0 10px 0; font-size: 18px; font-weight: 600;">✅ Password Updated Successfully</p>
+              <p style="margin: 0; font-size: 14px; opacity: 0.9;">Your IECA account password has been changed.</p>
+            </div>
+            
+            <p style="color: #555; line-height: 1.6; margin: 20px 0;">
+              This email confirms that your password for your IECA Member Portal account has been successfully changed on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}.
+            </p>
+
+            <div style="background: #e8f5e8; border: 1px solid #c8e6c9; border-radius: 8px; padding: 15px; margin: 25px 0;">
+              <p style="margin: 0 0 10px 0; color: #2e7d32; font-weight: 600;">🛡️ Security Tips:</p>
+              <ul style="margin: 0; padding-left: 20px; color: #2e7d32; font-size: 14px;">
+                <li>Use a unique password for your IECA account</li>
+                <li>Enable two-factor authentication if available</li>
+                <li>Never share your password with anyone</li>
+                <li>Contact us immediately if you notice suspicious activity</li>
+              </ul>
+            </div>
+
+            <div style="background: #ffebee; border: 1px solid #ffcdd2; border-radius: 8px; padding: 15px; margin: 25px 0;">
+              <p style="margin: 0; color: #c62828; font-weight: 600; font-size: 14px;">
+                ⚠️ If you did not change your password, please contact our security team immediately at 
+                <a href="mailto:security@ieca.com" style="color: #c62828;">security@ieca.com</a>
+              </p>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${process.env.NEXT_PUBLIC_BASE_URL}/login" 
+                 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; padding: 15px 40px; border-radius: 25px; font-weight: 600; display: inline-block;">
+                Access Member Portal
+              </a>
+            </div>
+
+            <p style="color: #777; font-size: 14px; text-align: center; margin: 30px 0 0 0;">
+              Need help? Contact us at <a href="mailto:support@ieca.com" style="color: #667eea;">support@ieca.com</a>
+            </p>
+          </div>
+          
+          <!-- Footer -->
+          <div style="background-color: #2d3748; color: white; padding: 30px; text-align: center;">
+            <p style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600;">IECA Security Team</p>
+            <p style="margin: 0; color: #a0aec0; font-size: 14px;">
+              Indian Ethical Cyber Army - Securing the Digital Future
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    try {
+      const mailOptions = {
+        from: `"IECA Cybersecurity" <${process.env.SMTP_USER}>`,
+        to: to,
+        subject: subject,
+        html: html,
+        text: `Password Changed Successfully - IECA. Hello ${name}, your password has been successfully changed on ${new Date().toLocaleDateString()}. If you did not change your password, contact security@ieca.com immediately.`
+      };
+
+      const result = await BadgeEmailService.transporter.sendMail(mailOptions);
+      console.log('Password change confirmation email sent:', result.messageId);
+
+      // Log the email
+      await prisma.emailLog.create({
+        data: {
+          recipient: to,
+          subject: subject,
+          status: 'SENT',
+          sentAt: new Date(),
+          metadata: {
+            emailType: 'password_change_confirmation'
+          }
+        }
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Failed to send password change confirmation email:', error);
+      
+      // Log the failed email
+      await prisma.emailLog.create({
+        data: {
+          recipient: to,
+          subject: subject,
+          status: 'FAILED',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          metadata: {
+            emailType: 'password_change_confirmation'
+          }
+        }
+      });
+
+      return false;
+    }
+  }
 }

@@ -2,6 +2,8 @@ import { prisma } from '@/lib/database';
 import { emailService } from '@/lib/email';
 import { Prisma } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { BadgeEmailService } from './services/badge-email-service';
+import { PasswordService } from './services/password-service';
 
 // User management functions
 export const userService = {
@@ -366,17 +368,69 @@ export const applicationService = {
       },
     });
 
-    // Send status update email for approved/rejected applications
-    if (status === 'APPROVED' || status === 'REJECTED') {
+    // Handle approved applications - create user account with password
+    if (status === 'APPROVED') {
+      try {
+        // Check if user already exists
+        const existingUser = await prisma.user.findUnique({
+          where: { email: application.email }
+        });
+
+        if (!existingUser) {
+          // Create new user account with generated password
+          // Convert null values to undefined for compatibility with PasswordService
+          const applicationData = {
+            ...application,
+            linkedin: application.linkedin || undefined,
+            github: application.github || undefined,
+          };
+          const { user, tempPassword } = await PasswordService.createUserAccountFromApplication(applicationData);
+          
+          // Send login credentials email
+          const badgeEmailService = new BadgeEmailService();
+          await badgeEmailService.sendLoginCredentialsEmail(
+            application.email,
+            application.name,
+            application.email,
+            tempPassword
+          );
+
+          console.log(`✅ Created user account for ${application.name} (${application.email})`);
+        } else {
+          // User already exists, just send approval notification
+          await emailService.sendApplicationStatusUpdate(
+            application.email,
+            application.name,
+            'approved',
+            reviewNotes
+          );
+        }
+      } catch (error) {
+        console.error('Failed to create user account or send credentials email:', error);
+        // Still send regular approval email as fallback
+        try {
+          await emailService.sendApplicationStatusUpdate(
+            application.email,
+            application.name,
+            'approved',
+            reviewNotes
+          );
+        } catch (emailError) {
+          console.error('Failed to send fallback approval email:', emailError);
+        }
+      }
+    }
+    // Handle rejected applications
+    else if (status === 'REJECTED') {
       try {
         await emailService.sendApplicationStatusUpdate(
           application.email,
           application.name,
-          status.toLowerCase() as 'approved' | 'rejected',
+          'rejected',
           reviewNotes
         );
       } catch (error) {
-        console.error('Failed to send application status email:', error);
+        console.error('Failed to send rejection email:', error);
         // Don't fail status update if email fails
       }
     }

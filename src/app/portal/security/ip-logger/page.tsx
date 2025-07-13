@@ -134,7 +134,7 @@ export default function IPLoggerPage() {
     trackingEnabled: true
   });
 
-  const [selectedSession, setSelectedSession] = useState<string>('');
+  const [selectedSession, setSelectedSession] = useState<string>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -221,7 +221,7 @@ export default function IPLoggerPage() {
 
   const exportLogs = () => {
     const filteredLogs = logs.filter(log => 
-      selectedSession ? log.sessionId === selectedSession : true
+      selectedSession === 'all' || log.sessionId === selectedSession
     );
 
     const csvContent = [
@@ -256,7 +256,7 @@ export default function IPLoggerPage() {
       log.city.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCountry = filterCountry === 'all' || log.country === filterCountry;
-    const matchesSession = selectedSession === '' || log.sessionId === selectedSession;
+    const matchesSession = selectedSession === 'all' || log.sessionId === selectedSession;
     
     return matchesSearch && matchesCountry && matchesSession;
   });
@@ -566,7 +566,7 @@ export default function IPLoggerPage() {
                         <SelectValue placeholder="All sessions" />
                       </SelectTrigger>
                       <SelectContent className="bg-slate-700 border-slate-600">
-                        <SelectItem value="">All Sessions</SelectItem>
+                        <SelectItem value="all">All Sessions</SelectItem>
                         {sessions.map(session => (
                           <SelectItem key={session.id} value={session.id}>{session.name}</SelectItem>
                         ))}
