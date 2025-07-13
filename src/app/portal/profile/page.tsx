@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Upload, Award, Target, ShieldCheck, Zap } from "lucide-react";
+import { Upload, Award, Target, ShieldCheck, Zap, TrendingUp, Calendar, Activity, Users, MessageSquare, FileText, Clock, Trophy, ExternalLink } from "lucide-react";
 import React from 'react';
 
 const skills = [
@@ -247,51 +247,178 @@ export default function ProfilePage() {
                 <CardDescription>Your contributions and recognitions within the IECA community.</CardDescription>
             </CardHeader>
             <CardContent className="pt-6 space-y-6">
-                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                    <div className="p-4 bg-secondary/50 rounded-lg">
-                        <p className="text-sm text-muted-foreground">Rank</p>
-                        <p className="text-2xl font-bold">#{userStats?.rank || 0}</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                    <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg border">
+                        <div className="flex items-center justify-center mb-2">
+                            <TrendingUp className="h-6 w-6 text-primary" />
+                        </div>
+                        <p className="text-sm text-muted-foreground">Leaderboard Rank</p>
+                        <p className="text-2xl font-bold text-primary">#{userStats?.rank || 'N/A'}</p>
+                        <p className="text-xs text-muted-foreground">{userStats?.rankTitle || 'Rookie'}</p>
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mt-2 w-full text-xs"
+                            onClick={() => window.open('/portal/leaderboard', '_blank')}
+                        >
+                            <Trophy className="h-3 w-3 mr-1" />
+                            View Leaderboard
+                        </Button>
                     </div>
-                     <div className="p-4 bg-secondary/50 rounded-lg">
-                        <p className="text-sm text-muted-foreground">Points</p>
-                        <p className="text-2xl font-bold">{userStats?.points || 0}</p>
+                    <div className="p-4 bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-lg border">
+                        <div className="flex items-center justify-center mb-2">
+                            <Award className="h-6 w-6 text-green-500" />
+                        </div>
+                        <p className="text-sm text-muted-foreground">Total Points</p>
+                        <p className="text-2xl font-bold text-green-500">{userStats?.points?.toLocaleString() || 0}</p>
+                        <p className="text-xs text-muted-foreground">{userStats?.reputation || 0} reputation</p>
                     </div>
-                     <div className="p-4 bg-secondary/50 rounded-lg">
-                        <p className="text-sm text-muted-foreground">Missions</p>
-                        <p className="text-2xl font-bold">{userStats?.missions || 0}</p>
+                    <div className="p-4 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-lg border">
+                        <div className="flex items-center justify-center mb-2">
+                            <Target className="h-6 w-6 text-blue-500" />
+                        </div>
+                        <p className="text-sm text-muted-foreground">Missions Completed</p>
+                        <p className="text-2xl font-bold text-blue-500">{userStats?.missions || 0}</p>
+                        <p className="text-xs text-muted-foreground">Total activities</p>
                     </div>
-                     <div className="p-4 bg-secondary/50 rounded-lg">
-                        <p className="text-sm text-muted-foreground">Badges</p>
-                        <p className="text-2xl font-bold">{userStats?.badges || 0}</p>
+                    <div className="p-4 bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-lg border">
+                        <div className="flex items-center justify-center mb-2">
+                            <ShieldCheck className="h-6 w-6 text-purple-500" />
+                        </div>
+                        <p className="text-sm text-muted-foreground">Badges Earned</p>
+                        <p className="text-2xl font-bold text-purple-500">{userStats?.badges || 0}</p>
+                        <p className="text-xs text-muted-foreground">Achievements</p>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    {userStats?.badgeDetails?.map((badge: any) => {
-                        const iconMap: { [key: string]: any } = {
-                          'Award': Award,
-                          'Target': Target,
-                          'ShieldCheck': ShieldCheck,
-                          'Zap': Zap,
-                        };
-                        const Icon = iconMap[badge.icon] || Award;
-                        return (
-                             <div key={badge.id} className="flex items-center gap-4 p-4 border rounded-lg bg-card">
-                                <Icon className="h-8 w-8 text-primary"/>
-                                <div>
-                                    <h4 className="font-bold text-sm">{badge.title}</h4>
-                                    <p className="text-xs text-muted-foreground">{badge.description}</p>
+                {/* Activity Breakdown */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div className="text-center p-3 bg-secondary/30 rounded-lg">
+                        <ShieldCheck className="h-5 w-5 mx-auto mb-1 text-blue-500" />
+                        <p className="text-sm font-medium">{userStats?.activityBreakdown?.securityToolUsage || 0}</p>
+                        <p className="text-xs text-muted-foreground">Security Tools</p>
+                    </div>
+                    <div className="text-center p-3 bg-secondary/30 rounded-lg">
+                        <Zap className="h-5 w-5 mx-auto mb-1 text-green-500" />
+                        <p className="text-sm font-medium">{userStats?.activityBreakdown?.securityScans || 0}</p>
+                        <p className="text-xs text-muted-foreground">Security Scans</p>
+                    </div>
+                    <div className="text-center p-3 bg-secondary/30 rounded-lg">
+                        <FileText className="h-5 w-5 mx-auto mb-1 text-red-500" />
+                        <p className="text-sm font-medium">{userStats?.activityBreakdown?.vulnerabilityReports || 0}</p>
+                        <p className="text-xs text-muted-foreground">Vuln Reports</p>
+                    </div>
+                    <div className="text-center p-3 bg-secondary/30 rounded-lg">
+                        <MessageSquare className="h-5 w-5 mx-auto mb-1 text-purple-500" />
+                        <p className="text-sm font-medium">{userStats?.activityBreakdown?.blogPosts || 0}</p>
+                        <p className="text-xs text-muted-foreground">Blog Posts</p>
+                    </div>
+                    <div className="text-center p-3 bg-secondary/30 rounded-lg">
+                        <Users className="h-5 w-5 mx-auto mb-1 text-orange-500" />
+                        <p className="text-sm font-medium">{userStats?.activityBreakdown?.chatMessages || 0}</p>
+                        <p className="text-xs text-muted-foreground">Chat Messages</p>
+                    </div>
+                </div>
+
+                {/* Achievement Badges */}
+                <div>
+                    <h4 className="font-semibold mb-4 flex items-center gap-2">
+                        <Award className="h-5 w-5" />
+                        Achievement Badges
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {userStats?.badgeDetails?.map((badge: any) => {
+                            const iconMap: { [key: string]: any } = {
+                              'Award': Award,
+                              'Target': Target,
+                              'ShieldCheck': ShieldCheck,
+                              'Zap': Zap,
+                              'Calendar': Calendar,
+                              'Crown': Trophy,
+                              'Trophy': Trophy,
+                            };
+                            const Icon = iconMap[badge.icon] || Award;
+                            return (
+                                 <div key={badge.id} className="flex items-center gap-4 p-4 border rounded-lg bg-gradient-to-r from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/15 transition-all">
+                                    <Icon className="h-8 w-8 text-primary"/>
+                                    <div>
+                                        <h5 className="font-bold text-sm">{badge.title}</h5>
+                                        <p className="text-xs text-muted-foreground">{badge.description}</p>
+                                    </div>
+                                 </div>
+                            )
+                        })}
+                        {(!userStats?.badgeDetails || userStats.badgeDetails.length === 0) && (
+                          <div className="col-span-full text-center py-8 bg-muted/50 rounded-lg border-2 border-dashed">
+                            <Award className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
+                            <p className="text-muted-foreground">No badges earned yet</p>
+                            <p className="text-sm text-muted-foreground">Complete security missions to unlock achievements!</p>
+                          </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Recent Activity */}
+                {userStats?.recentActivity && userStats.recentActivity.length > 0 && (
+                    <div>
+                        <h4 className="font-semibold mb-4 flex items-center gap-2">
+                            <Activity className="h-5 w-5" />
+                            Recent Activity
+                        </h4>
+                        <div className="space-y-3">
+                            {userStats.recentActivity.map((activity: any, index: number) => (
+                                <div key={index} className="flex items-center gap-4 p-3 bg-secondary/30 rounded-lg">
+                                    <div className="flex-shrink-0">
+                                        {activity.type === 'security_tool' && <ShieldCheck className="h-5 w-5 text-blue-500" />}
+                                        {activity.type === 'security_scan' && <Zap className="h-5 w-5 text-green-500" />}
+                                        {activity.type === 'vulnerability_report' && <FileText className="h-5 w-5 text-red-500" />}
+                                        {activity.type === 'blog_post' && <MessageSquare className="h-5 w-5 text-purple-500" />}
+                                    </div>
+                                    <div className="flex-1">
+                                        <h5 className="font-medium text-sm">{activity.title}</h5>
+                                        <p className="text-xs text-muted-foreground">{activity.description}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm font-medium text-primary">+{activity.points}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {new Date(activity.date).toLocaleDateString()}
+                                        </p>
+                                    </div>
                                 </div>
-                             </div>
-                        )
-                    })}
-                    {(!userStats?.badgeDetails || userStats.badgeDetails.length === 0) && (
-                      <div className="col-span-full text-center py-8">
-                        <p className="text-muted-foreground">No badges earned yet. Complete more security missions to unlock achievements!</p>
-                      </div>
-                    )}
-                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
+                {/* Member Since */}
+                <div className="flex items-center justify-between p-4 bg-secondary/30 rounded-lg">
+                    <div className="flex items-center gap-3">
+                        <Calendar className="h-5 w-5 text-primary" />
+                        <div>
+                            <p className="font-medium">Member Since</p>
+                            <p className="text-sm text-muted-foreground">
+                                {userStats?.joinedAt ? new Date(userStats.joinedAt).toLocaleDateString('en-US', { 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric' 
+                                }) : 'Unknown'}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <Clock className="h-5 w-5 text-primary" />
+                        <div className="text-right">
+                            <p className="font-medium">Last Active</p>
+                            <p className="text-sm text-muted-foreground">
+                                {userStats?.lastActive ? new Date(userStats.lastActive).toLocaleDateString('en-US', { 
+                                    year: 'numeric', 
+                                    month: 'short', 
+                                    day: 'numeric' 
+                                }) : 'Recently'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </CardContent>
           </Card>
           
