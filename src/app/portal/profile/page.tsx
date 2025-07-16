@@ -563,8 +563,6 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
           
-          <ChangePasswordCard />
-          
           <div className="flex justify-end">
             <Button type="submit" size="lg" disabled={loading}>
               {loading ? "Saving..." : "Save Changes"}
@@ -572,6 +570,8 @@ export default function ProfilePage() {
           </div>
         </form>
       </Form>
+      
+      <ChangePasswordCard />
     </div>
   );
 }

@@ -1,0 +1,56 @@
+{
+  "name": "IECA - Indian Error Cyber Army",
+  "short_name": "IECA",
+  "description": "India's premier cybersecurity collective providing free threat intelligence, vulnerability assessments, and cyber education.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-IN",
+  "categories": ["security", "education", "business"],
+  "icons": [
+    {
+      "src": "/icon.tsx",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/email/ieca-logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/email/ieca-logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Portal",
+      "short_name": "Portal",
+      "description": "Access IECA portal",
+      "url": "/portal",
+      "icons": [{ "src": "/icon.tsx", "sizes": "32x32" }]
+    },
+    {
+      "name": "Resources",
+      "short_name": "Resources",
+      "description": "Cybersecurity resources",
+      "url": "/resources",
+      "icons": [{ "src": "/icon.tsx", "sizes": "32x32" }]
+    },
+    {
+      "name": "Contact",
+      "short_name": "Contact",
+      "description": "Report threats and contact us",
+      "url": "/contact",
+      "icons": [{ "src": "/icon.tsx", "sizes": "32x32" }]
+    }
+  ]
+}
