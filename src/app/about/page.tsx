@@ -5,6 +5,26 @@ import { Target, Shield, Users, Globe, Linkedin, Github, Mail, Link as LinkIcon,
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { generateSEO, generateStructuredData } from "@/lib/seo";
+import { Metadata } from 'next';
+
+export const metadata: Metadata = generateSEO({
+  title: 'About IECA - Indian Error Cyber Army | Our Mission & Team',
+  description: 'Learn about IECA, India\'s premier volunteer-driven cybersecurity collective. Discover our mission, values, team, and commitment to protecting India\'s digital infrastructure through free cybersecurity services.',
+  keywords: [
+    'about IECA',
+    'Indian Error Cyber Army mission',
+    'cybersecurity team India',
+    'volunteer cybersecurity',
+    'non-profit cybersecurity',
+    'cyber defense India',
+    'ethical hacking collective',
+    'cybersecurity professionals India',
+    'digital security mission',
+    'cyber army volunteers'
+  ],
+  canonical: 'https://ieca.in/about'
+});
 
 const teamMembers = [
     { name: "Arjun Sharma", role: "Chief Security Architect", avatar: "https://placehold.co/100x100.png", hint: "man portrait" },
@@ -14,8 +34,26 @@ const teamMembers = [
 ];
 
 export default function AboutPage() {
+  const structuredData = generateStructuredData('WebPage', {
+    name: 'About IECA - Indian Error Cyber Army',
+    description: 'Learn about IECA, India\'s premier volunteer-driven cybersecurity collective and our mission to protect India\'s digital infrastructure.',
+    url: 'https://ieca.in/about',
+    breadcrumb: {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ieca.in' },
+        { '@type': 'ListItem', position: 2, name: 'About', item: 'https://ieca.in/about' }
+      ]
+    }
+  });
+
   return (
     <div className="container mx-auto py-12 md:py-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      
       <section className="text-center mb-16">
         <h1 className="text-4xl md:text-5xl font-bold font-headline text-accent">About the Indian Error Cyber Army</h1>
         <p className="text-lg text-muted-foreground mt-4 max-w-3xl mx-auto">
@@ -27,7 +65,7 @@ export default function AboutPage() {
         <div className="relative h-64 md:h-96 w-full rounded-lg overflow-hidden">
              <Image 
                 src="https://placehold.co/1200x400.png"
-                alt="IECA Team Collaboration" 
+                alt="IECA Team Collaboration - Indian Error Cyber Army cybersecurity professionals working together" 
                 fill 
                 style={{objectFit: "cover"}}
                 data-ai-hint="team collaboration"

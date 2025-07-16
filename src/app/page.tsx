@@ -4,10 +4,77 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ShieldCheck, ServerCog, Users, Trophy, Star, Target, FileScan } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'IECA - Indian Error Cyber Army | Free Cybersecurity Services for India',
+  description: "India's premier cybersecurity collective. Get free threat intelligence, vulnerability assessments, incident response, and cyber education. Join 500+ ethical hackers protecting India's digital infrastructure.",
+  keywords: [
+    'cybersecurity India',
+    'free cybersecurity services',
+    'threat intelligence',
+    'vulnerability assessment',
+    'incident response',
+    'ethical hacking India',
+    'cyber security collective',
+    'Indian hackers',
+    'penetration testing',
+    'cyber education',
+    'digital security India',
+    'cyber defense',
+    'security consulting'
+  ],
+  openGraph: {
+    title: 'IECA - Indian Error Cyber Army | Free Cybersecurity Services',
+    description: "India's premier cybersecurity collective providing free threat intelligence, vulnerability assessments, and cyber education. Join 500+ ethical hackers.",
+    type: 'website',
+    url: 'https://ieca.in',
+    images: [
+      {
+        url: '/email/ieca-logo.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'IECA - Indian Error Cyber Army - Free Cybersecurity Services',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'IECA - Indian Error Cyber Army | Free Cybersecurity Services',
+    description: "India's premier cybersecurity collective providing free threat intelligence and cyber education.",
+    images: ['/email/ieca-logo.jpg'],
+  },
+  alternates: {
+    canonical: 'https://ieca.in',
+  },
+};
 
 export default function Home() {
   return (
     <div className="flex flex-col">
+      {/* JSON-LD for Homepage */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "IECA - Indian Error Cyber Army",
+            "url": "https://ieca.in",
+            "description": "India's premier cybersecurity collective providing free threat intelligence, vulnerability assessments, incident response, and cyber education.",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://ieca.in/search?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            },
+            "sameAs": [
+              "https://twitter.com/ieca_cyber",
+              "https://linkedin.com/company/ieca-cyber",
+              "https://github.com/ieca-cyber"
+            ]
+          }),
+        }}
+      />
       <HeroSection />
       <ServicesSection />
       <AchievementsSection />
@@ -20,20 +87,20 @@ export default function Home() {
 function HeroSection() {
   const title = "IECA: Indian Error Cyber Army";
   return (
-    <section className="py-24 md:py-40 bg-background">
+    <section className="py-24 md:py-40 bg-background" itemScope itemType="https://schema.org/Organization">
       <div className="container mx-auto text-center">
-        <h1 className="text-4xl md:text-6xl font-bold font-headline text-accent mb-6">
+        <h1 className="text-4xl md:text-6xl font-bold font-headline text-accent mb-6" itemProp="name">
             {title}
         </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+        <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8" itemProp="description">
           We are a collective of India's top hackers, the Indian Error Cyber Army, united by a single mission: to provide free, world-class cybersecurity services and protect our nation's digital future.
         </p>
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-4" role="group" aria-label="Primary actions">
           <Button size="lg" asChild>
-            <Link href="/contact">Report a Threat</Link>
+            <Link href="/contact" aria-label="Report a cybersecurity threat to IECA">Report a Threat</Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
-            <Link href="/resources">Explore Resources</Link>
+            <Link href="/resources" aria-label="Explore free cybersecurity resources and tools">Explore Resources</Link>
           </Button>
         </div>
       </div>
@@ -50,7 +117,7 @@ const services = [
 
 function ServicesSection() {
   return (
-    <section id="services" className="py-20 md:py-28 bg-secondary/50">
+    <section id="services" className="py-20 md:py-28 bg-secondary/50" itemScope itemType="https://schema.org/Service">
       <div className="container mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold font-headline text-accent">Our Free Services</h2>
@@ -60,15 +127,23 @@ function ServicesSection() {
           {services.map((service, index) => {
             const Icon = service.icon;
             return (
-              <Card key={index} className="text-center bg-card hover:shadow-lg transition-shadow duration-300">
+              <Card 
+                key={index} 
+                className="text-center bg-card hover:shadow-lg transition-shadow duration-300"
+                itemScope 
+                itemType="https://schema.org/Service"
+              >
                 <CardHeader>
                   <div className="mx-auto bg-primary/10 text-primary p-3 rounded-full w-fit">
-                    <Icon className="h-8 w-8" />
+                    <Icon className="h-8 w-8" aria-hidden="true" />
                   </div>
-                  <CardTitle className="font-headline mt-4">{service.title}</CardTitle>
+                  <CardTitle className="font-headline mt-4" itemProp="name">{service.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">{service.description}</p>
+                  <p className="text-muted-foreground" itemProp="description">{service.description}</p>
+                  <meta itemProp="provider" content="Indian Error Cyber Army" />
+                  <meta itemProp="priceRange" content="Free" />
+                  <meta itemProp="category" content="Cybersecurity" />
                 </CardContent>
               </Card>
             );
