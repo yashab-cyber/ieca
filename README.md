@@ -367,7 +367,7 @@ Customize email templates in `scripts/main.js`:
 #### **Yashab Alam** (Founder & CEO, IECA)
 - **Email**: yashabalam707@gmail.com
 - **GitHub**: [@yashab-cyber](https://github.com/yashab-cyber)
-- **LinkedIn**: [Yashab Alam](https://www.linkedin.com/in/yashabalam)
+- **LinkedIn**: [Yashab Alam](https://www.linkedin.com/in/yashab-alam)
 - **Instagram**: [@yashab.alam](https://www.instagram.com/yashab.alam)
 - **Role**: Project Architecture, Security Implementation, Strategic Direction
 

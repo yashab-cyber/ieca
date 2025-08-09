@@ -129,7 +129,7 @@ export default function AboutPage() {
               <div className="flex flex-wrap gap-4 text-sm mt-4 justify-center md:justify-start">
                   <Link href="mailto:yashabalam707@gmail.com" className="flex items-center gap-2 text-muted-foreground hover:text-primary"><Mail className="h-4 w-4" /> Email</Link>
                   <Link href="https://github.com/yashab-cyber" target="_blank" className="flex items-center gap-2 text-muted-foreground hover:text-primary"><Github className="h-4 w-4" /> GitHub</Link>
-                  <Link href="https://www.linkedin.com/in/yashabalam" target="_blank" className="flex items-center gap-2 text-muted-foreground hover:text-primary"><Linkedin className="h-4 w-4" /> LinkedIn</Link>
+                  <Link href="https://www.linkedin.com/in/yashab-alam" target="_blank" className="flex items-center gap-2 text-muted-foreground hover:text-primary"><Linkedin className="h-4 w-4" /> LinkedIn</Link>
                   <Link href="https://www.instagram.com/yashab.alam" target="_blank" className="flex items-center gap-2 text-muted-foreground hover:text-primary"><Instagram className="h-4 w-4" /> Instagram</Link>
               </div>
             </div>

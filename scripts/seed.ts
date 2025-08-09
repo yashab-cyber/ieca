@@ -18,7 +18,7 @@ async function main() {
         password: adminPassword,
         name: 'Yashab Alam',
         phone: '+91-XXXXXXXXXX',
-        linkedin: 'https://www.linkedin.com/in/yashabalam',
+        linkedin: 'https://www.linkedin.com/in/yashab-alam',
         github: 'https://github.com/yashab-cyber',
         role: 'ADMIN',
         isActive: true,
